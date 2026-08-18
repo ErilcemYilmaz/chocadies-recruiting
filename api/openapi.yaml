@@ -1,0 +1,426 @@
+openapi: 3.1.0
+
+info:
+  title: Chocadies Recruiting API
+  description: |
+    Web-API der Personalgewinnungsplattform der Chocolatier Chocadies AG.
+
+    Die Schnittstelle wird von zwei Gruppen konsumiert:
+    der internen SPA Web-App und der Mobile-App sowie externen
+    Personalvermittlungsfirmen, welche Bewerbungen einreichen und den
+    Bearbeitungsstatus abfragen.
+
+    Gemaess Aufgabenstellung ist genau ein Datenobjekt vorgesehen: Bewerbung.
+  version: 1.0.0
+  contact:
+    name: Informatik Chocolatier Chocadies AG
+    email: informatik@chocadies.ch
+  license:
+    name: Proprietaer
+
+servers:
+  - url: https://api.chocadies.ch/recruiting/v1
+    description: Produktion
+  - url: https://api-test.chocadies.ch/recruiting/v1
+    description: Testumgebung
+  - url: http://localhost:3000/v1
+    description: Lokale Entwicklung
+
+tags:
+  - name: Bewerbungen
+    description: Verwaltung der Bewerbungen
+
+security:
+  - bearerAuth: []
+
+paths:
+  /bewerbungen:
+    get:
+      tags: [Bewerbungen]
+      summary: Bewerbungen suchen
+      description: |
+        Liefert eine seitenweise Liste von Bewerbungen. Ohne Filter werden alle
+        Bewerbungen zurueckgegeben, auf welche das verwendete Zugriffstoken
+        berechtigt ist. Personalvermittlungsfirmen sehen ausschliesslich die von
+        ihnen selbst eingereichten Bewerbungen.
+      operationId: bewerbungenSuchen
+      parameters:
+        - name: suchbegriff
+          in: query
+          description: Freitextsuche ueber Nachname, Vorname und Stelle.
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+          example: Meier
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Bewerbungsstatus'
+        - name: standort
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Standort'
+        - name: seite
+          in: query
+          description: Seitennummer, beginnend bei 1.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: proSeite
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Trefferliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bewerbungsliste'
+        '400':
+          $ref: '#/components/responses/UngueltigeAnfrage'
+        '401':
+          $ref: '#/components/responses/NichtAuthentisiert'
+
+    post:
+      tags: [Bewerbungen]
+      summary: Bewerbung anlegen
+      description: |
+        Erfasst eine neue Bewerbung. Die Felder id, status und eingangsdatum
+        werden serverseitig gesetzt und im Anfragekoerper ignoriert.
+      operationId: bewerbungAnlegen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BewerbungEingabe'
+      responses:
+        '201':
+          description: Bewerbung wurde angelegt
+          headers:
+            Location:
+              description: URL der neu angelegten Bewerbung
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bewerbung'
+        '400':
+          $ref: '#/components/responses/UngueltigeAnfrage'
+        '401':
+          $ref: '#/components/responses/NichtAuthentisiert'
+        '409':
+          description: Fuer diese E-Mail-Adresse und Stelle besteht bereits eine offene Bewerbung
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fehler'
+
+  /bewerbungen/{bewerbungId}:
+    parameters:
+      - name: bewerbungId
+        in: path
+        required: true
+        description: Eindeutige Kennung der Bewerbung.
+        schema:
+          type: string
+          pattern: '^[0-9a-fA-F]{24}$'
+        example: 6620f1a2c3d4e5f6a7b8c9d0
+
+    get:
+      tags: [Bewerbungen]
+      summary: Bewerbung lesen
+      operationId: bewerbungLesen
+      responses:
+        '200':
+          description: Die angeforderte Bewerbung
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bewerbung'
+        '401':
+          $ref: '#/components/responses/NichtAuthentisiert'
+        '404':
+          $ref: '#/components/responses/NichtGefunden'
+
+    put:
+      tags: [Bewerbungen]
+      summary: Bewerbung aendern
+      description: |
+        Ersetzt die aenderbaren Felder der Bewerbung. Ein Statuswechsel wird
+        protokolliert, damit die Auskunftspflicht nach DSG und DSGVO erfuellt
+        werden kann.
+      operationId: bewerbungAendern
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BewerbungEingabe'
+      responses:
+        '200':
+          description: Bewerbung wurde geaendert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bewerbung'
+        '400':
+          $ref: '#/components/responses/UngueltigeAnfrage'
+        '401':
+          $ref: '#/components/responses/NichtAuthentisiert'
+        '404':
+          $ref: '#/components/responses/NichtGefunden'
+
+    delete:
+      tags: [Bewerbungen]
+      summary: Bewerbung loeschen
+      description: |
+        Loescht die Bewerbung endgueltig. Der Aufruf setzt das Recht auf
+        Loeschung nach Art. 17 DSGVO technisch um.
+      operationId: bewerbungLoeschen
+      responses:
+        '204':
+          description: Bewerbung wurde geloescht
+        '401':
+          $ref: '#/components/responses/NichtAuthentisiert'
+        '403':
+          description: Keine Berechtigung zum Loeschen dieser Bewerbung
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fehler'
+        '404':
+          $ref: '#/components/responses/NichtGefunden'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Zugriffstoken im Authorization-Header. Interne Benutzende erhalten das
+        Token ueber die Anmeldung der Plattform, Personalvermittlungsfirmen
+        ueber einen technischen Benutzer mit eingeschraenktem Umfang.
+
+  schemas:
+
+    Bewerbungsstatus:
+      type: string
+      description: Bearbeitungsstand der Bewerbung.
+      enum:
+        - eingegangen
+        - in_pruefung
+        - zum_gespraech_eingeladen
+        - abgelehnt
+        - eingestellt
+      example: eingegangen
+
+    Standort:
+      type: string
+      description: Standort, fuer welchen sich die Person bewirbt.
+      enum:
+        - lenzburg
+        - nancy
+        - filiale_ch
+        - filiale_fr
+        - store_international
+      example: lenzburg
+
+    Sprache:
+      type: string
+      description: Korrespondenzsprache der bewerbenden Person.
+      enum: [de, fr]
+      default: de
+
+    Dokument:
+      type: object
+      description: Verweis auf eine hochgeladene Bewerbungsunterlage.
+      required: [dateiname, typ, url]
+      properties:
+        dateiname:
+          type: string
+          maxLength: 255
+          example: lebenslauf.pdf
+        typ:
+          type: string
+          enum: [lebenslauf, motivationsschreiben, zeugnis, sonstiges]
+          example: lebenslauf
+        url:
+          type: string
+          format: uri
+          description: Zeitlich befristete URL auf den Dokumentenspeicher.
+
+    BewerbungEingabe:
+      type: object
+      description: Vom Aufrufer setzbare Felder einer Bewerbung.
+      required: [nachname, vorname, email, stelle, standort]
+      properties:
+        nachname:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Meier
+        vorname:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Anna
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: anna.meier@example.ch
+        telefon:
+          type: string
+          pattern: '^\+?[0-9 ]{8,20}$'
+          example: '+41 62 000 00 00'
+        stelle:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Chocolatier/in Produktion Lenzburg
+        standort:
+          $ref: '#/components/schemas/Standort'
+        sprache:
+          $ref: '#/components/schemas/Sprache'
+        bemerkung:
+          type: string
+          maxLength: 2000
+        dokumente:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Dokument'
+      additionalProperties: false
+
+    Bewerbung:
+      type: object
+      description: Vollstaendige Bewerbung inklusive serverseitig gesetzter Felder.
+      required: [id, nachname, vorname, email, stelle, standort, status, eingangsdatum]
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: 6620f1a2c3d4e5f6a7b8c9d0
+        nachname:
+          type: string
+          example: Meier
+        vorname:
+          type: string
+          example: Anna
+        email:
+          type: string
+          format: email
+          example: anna.meier@example.ch
+        telefon:
+          type: string
+          example: '+41 62 000 00 00'
+        stelle:
+          type: string
+          example: Chocolatier/in Produktion Lenzburg
+        standort:
+          $ref: '#/components/schemas/Standort'
+        sprache:
+          $ref: '#/components/schemas/Sprache'
+        status:
+          $ref: '#/components/schemas/Bewerbungsstatus'
+        bemerkung:
+          type: string
+        dokumente:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dokument'
+        quelle:
+          type: string
+          description: Herkunft der Bewerbung.
+          enum: [webshop, mobile_app, linkedin, personalvermittlung]
+          example: linkedin
+        eingangsdatum:
+          type: string
+          format: date-time
+          readOnly: true
+          example: '2026-08-17T09:14:00Z'
+        aenderungsdatum:
+          type: string
+          format: date-time
+          readOnly: true
+
+    Bewerbungsliste:
+      type: object
+      required: [treffer, seite, proSeite, gesamt]
+      properties:
+        treffer:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bewerbung'
+        seite:
+          type: integer
+          example: 1
+        proSeite:
+          type: integer
+          example: 20
+        gesamt:
+          type: integer
+          description: Gesamtzahl der Treffer ueber alle Seiten.
+          example: 42
+
+    Fehler:
+      type: object
+      description: Einheitliche Fehlerantwort der gesamten Schnittstelle.
+      required: [code, meldung]
+      properties:
+        code:
+          type: string
+          example: VALIDIERUNG_FEHLGESCHLAGEN
+        meldung:
+          type: string
+          description: Meldung in der Sprache des Accept-Language-Headers.
+          example: Das Feld email ist erforderlich.
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              feld:
+                type: string
+                example: email
+              problem:
+                type: string
+                example: fehlt
+
+  responses:
+
+    UngueltigeAnfrage:
+      description: Die Anfrage ist fehlerhaft oder unvollstaendig
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fehler'
+
+    NichtAuthentisiert:
+      description: Kein gueltiges Zugriffstoken vorhanden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fehler'
+
+    NichtGefunden:
+      description: Die angeforderte Bewerbung existiert nicht
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fehler'
