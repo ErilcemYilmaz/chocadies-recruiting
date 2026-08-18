@@ -1,0 +1,118 @@
+@startuml Komponentendiagramm_Personalgewinnungsplattform
+' UML 2.5.1 Komponentendiagramm
+' Personalgewinnungsplattform der Chocolatier Chocadies AG
+' Rendern: https://www.plantuml.com/plantuml oder VS-Code-Erweiterung PlantUML
+
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+}
+skinparam component {
+  BackgroundColor #F5F5F5
+  BorderColor #444444
+}
+
+title Personalgewinnungsplattform Chocadies AG: Komponentensicht
+
+package "Clientseite" as CLIENT {
+
+  package "SPA Web-App (React)" as SPA {
+    [Praesentationsschicht] as SPA_UI
+    [Zustandsverwaltung] as SPA_STATE
+    [API-Client] as SPA_API
+    [Internationalisierung DE/FR] as SPA_I18N
+  }
+
+  package "Mobile-App (React Native)" as MOBILE {
+    [Praesentationsschicht Mobil] as MOB_UI
+    [API-Client Mobil] as MOB_API
+  }
+}
+
+package "Serverseite" as SERVER {
+
+  package "API-Schicht" as APILAYER {
+    [REST-Controller] as CTRL
+    [Authentisierung und Autorisierung] as AUTH
+    [Eingabevalidierung] as VALID
+  }
+
+  package "Domaenenschicht" as DOMAIN {
+    [Bewerbungsdienst] as SVC
+    [Statusprotokollierung] as AUDIT
+  }
+
+  package "Integrationsschicht" as INTEG {
+    [SAFE-Konnektor] as SAFECON
+    [LinkedIn-Konnektor] as LICON
+  }
+
+  package "Data-Access-Layer" as DAL {
+    [Bewerbungs-Repository] as REPO
+  }
+}
+
+database "MongoDB\n(Bewerbungen)" as DB
+
+package "Umsysteme" as EXT {
+  [ERP SAFE, HR-Modul] as SAFE
+  [LinkedIn] as LINKEDIN
+  [Personalvermittlungsfirmen] as VERMITTLER
+}
+
+' Bereitgestellte und benoetigte Schnittstellen
+interface "IBewerbungAPI" as I_API
+interface "IPersistenz" as I_PERS
+interface "IHRIntegration" as I_HR
+interface "IStellenanzeigen" as I_LI
+
+' Clientseitige Assoziationen
+SPA_UI --> SPA_STATE
+SPA_UI --> SPA_I18N
+SPA_STATE --> SPA_API
+MOB_UI --> MOB_API
+
+' Zugriff der Clients auf die Web-API
+SPA_API ..> I_API : HTTPS / JSON
+MOB_API ..> I_API : HTTPS / JSON
+VERMITTLER ..> I_API : HTTPS / JSON
+
+' Bereitstellung der Web-API
+CTRL -up- I_API
+
+' Serverseitige Assoziationen
+CTRL --> AUTH
+CTRL --> VALID
+CTRL --> SVC
+SVC --> AUDIT
+SVC --> REPO
+SVC --> SAFECON
+SVC --> LICON
+
+' Persistenz
+REPO -down- I_PERS
+I_PERS ..> DB
+
+' Umsysteme
+SAFECON ..> I_HR
+I_HR ..> SAFE
+LICON ..> I_LI
+I_LI ..> LINKEDIN
+
+note right of AUTH
+  Zugriffstoken im Format JWT.
+  Personalvermittlungsfirmen erhalten
+  einen eingeschraenkten Umfang.
+end note
+
+note bottom of DB
+  Non-SQL-Datenbank gemaess
+  Aufgabenstellung 4.2.2.
+end note
+
+@enduml
