@@ -1,0 +1,22 @@
+# Abhaengigkeiten
+node_modules/
+
+# Build-Artefakte
+dist/
+build/
+
+# Umgebungsvariablen (enthalten Zugangsdaten, siehe docs/mongodb-atlas-setup.md)
+.env
+.env.local
+*.env
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor und Betriebssystem
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
