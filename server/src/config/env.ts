@@ -3,7 +3,7 @@ import 'dotenv/config';
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Umgebungsvariable ${name} fehlt. Siehe server/.env.example.`);
+    throw new Error(`Umgebungsvariable ${name} fehlt. Siehe README.md, Abschnitt "Server lokal starten".`);
   }
   return value;
 }

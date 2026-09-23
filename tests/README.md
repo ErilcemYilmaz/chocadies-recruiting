@@ -10,7 +10,7 @@ folgt in der CI/CD-Pipeline (GitHub Actions, Kapitel 4.4).
 1. Collection in Postman importieren (Datei > Import).
 2. Server lokal starten: im Ordner `server` `npm run dev` (setzt eine
    funktionierende `.env` mit `MONGODB_URI` und `JWT_SECRET` voraus, siehe
-   `server/.env.example`).
+   README.md im Hauptordner).
 3. Test-Tokens erzeugen: im Ordner `server` `npm run token:intern` bzw.
    `npm run token:vermittler -- firma-a` ausfuehren und die ausgegebenen
    Tokens in die Collection-Variablen `internToken` bzw. `vermittlerToken`

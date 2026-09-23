@@ -17,9 +17,9 @@ Vorgabe: Frankfurt (eu-central-1), Tarif M0 (kostenlos).
    Sicherheitsbetrachtung der Arbeit.
 6. "Connect" -> "Drivers" -> Node.js, Verbindungsstring kopieren.
 7. Verbindungsstring lokal in `server/.env` als `MONGODB_URI` eintragen
-   (Vorlage: `server/.env.example`). Platzhalter `<benutzer>`, `<passwort>`
-   und `<cluster-url>` ersetzen, Datenbankname `chocadies-recruiting`
-   ergaenzen.
+   (Aufbau siehe README.md, Abschnitt "Server lokal starten"). Platzhalter
+   `<benutzer>`, `<passwort>` und `<cluster-url>` ersetzen, Datenbankname
+   `chocadies-recruiting` ergaenzen.
 8. Verbindung testen: im Ordner `server` `npm install` und danach
    `npm run db:test` ausfuehren.
 

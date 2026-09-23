@@ -20,3 +20,7 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Schriftliche Arbeit (entsteht im Claude-Projekt, nicht im Repo)
+*.docx
+~$*

@@ -17,7 +17,27 @@ Transferaufgabe). Technologie-Entscheidungen und Setup-Ablauf siehe
 ```bash
 cd server
 npm install
-cp .env.example .env   # MONGODB_URI aus MongoDB Atlas eintragen
+# .env anlegen (siehe unten), wird nie committet
 npm run db:test        # prueft die MongoDB-Verbindung
-npm run dev
+npm run dev            # API unter http://localhost:3000/v1
+npm test               # Vitest/Supertest, ohne Datenbank
+npm run test:newman    # Postman-Collection per Newman, ohne Datenbank
 ```
+
+Benoetigte Variablen in `server/.env`:
+
+```
+MONGODB_URI=mongodb+srv://<benutzer>:<passwort>@<cluster-url>/chocadies-recruiting?retryWrites=true&w=majority
+PORT=3000
+NODE_ENV=development
+JWT_SECRET=<langer zufaelliger Wert>
+```
+
+Test-Tokens fuer Postman: `npm run token:intern` bzw.
+`npm run token:vermittler -- <firmaId>`.
+
+## Arbeitsweise
+
+Code und technische Artefakte entstehen mit Claude Code in diesem Repo,
+der Fliesstext der Arbeit separat in einem Claude-Projekt. Die Bruecke sind
+die Uebergabe-Dateien in `docs/uebergabe/`, Regeln siehe `CLAUDE.md`.

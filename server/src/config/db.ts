@@ -5,7 +5,7 @@ mongoose.set('strictQuery', true);
 
 /**
  * Baut die Verbindung zur MongoDB (Atlas) ueber Mongoose auf.
- * Der Verbindungsstring stammt aus MONGODB_URI (.env, siehe .env.example).
+ * Der Verbindungsstring stammt aus MONGODB_URI (lokale server/.env, siehe README.md).
  */
 export async function connectDb(): Promise<typeof mongoose> {
   mongoose.connection.on('connected', () => {
