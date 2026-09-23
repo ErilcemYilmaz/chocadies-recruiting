@@ -1,0 +1,253 @@
+{
+  "info": {
+    "name": "Chocadies Recruiting API",
+    "description": "Testfaelle fuer die Web-API aus api/openapi.yaml (Kapitel 4.2.4). Setzt {{internToken}} und {{vermittlerToken}} vor der Ausfuehrung, z.B. mit npm run token:intern / npm run token:vermittler im Ordner server (siehe tests/README.md).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/v1" },
+    { "key": "internToken", "value": "" },
+    { "key": "vermittlerToken", "value": "" },
+    { "key": "bewerbungId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Suchen ohne Token -> 401",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/bewerbungen"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401', () => pm.response.to.have.status(401));",
+              "pm.test('Fehlercode NICHT_AUTHENTISIERT', () => pm.expect(pm.response.json().code).to.eql('NICHT_AUTHENTISIERT'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Bewerbung anlegen (gueltig) -> 201",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{internToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/bewerbungen",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nachname\": \"Meier\",\n  \"vorname\": \"Anna\",\n  \"email\": \"anna.meier@example.ch\",\n  \"telefon\": \"+41 62 000 00 00\",\n  \"stelle\": \"Chocolatier/in Produktion Lenzburg\",\n  \"standort\": \"lenzburg\",\n  \"sprache\": \"de\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "pm.test('Status eingegangen gesetzt', () => pm.expect(json.status).to.eql('eingegangen'));",
+              "pm.test('id gesetzt', () => pm.expect(json.id).to.be.a('string'));",
+              "pm.collectionVariables.set('bewerbungId', json.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Gleiche Bewerbung erneut anlegen -> 409",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{internToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/bewerbungen",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nachname\": \"Meier\",\n  \"vorname\": \"Anna\",\n  \"email\": \"anna.meier@example.ch\",\n  \"stelle\": \"Chocolatier/in Produktion Lenzburg\",\n  \"standort\": \"lenzburg\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 409', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Bewerbung anlegen ohne Pflichtfeld email -> 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{internToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/bewerbungen",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nachname\": \"Muster\",\n  \"vorname\": \"Peter\",\n  \"stelle\": \"Verkauf Filiale\",\n  \"standort\": \"filiale_ch\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));",
+              "pm.test('Details enthalten Feld email', () => {",
+              "  const details = pm.response.json().details || [];",
+              "  pm.expect(details.some(d => d.feld === 'email')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Bewerbung lesen -> 200",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{internToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('kein internes Feld vermittlerId sichtbar', () => pm.expect(pm.response.json()).to.not.have.property('vermittlerId'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Unbekannte Bewerbung lesen -> 404",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{internToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/000000000000000000000000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }
+        }
+      ]
+    },
+    {
+      "name": "07 - Bewerbung suchen (Filter status/standort) -> 200",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{internToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen?status=eingegangen&standort=lenzburg&seite=1&proSeite=20"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "const json = pm.response.json();",
+              "pm.test('Antwort im Bewerbungsliste-Format', () => {",
+              "  pm.expect(json).to.have.all.keys('treffer', 'seite', 'proSeite', 'gesamt');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Bewerbung aendern (Status wechseln) -> 200",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{internToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nachname\": \"Meier\",\n  \"vorname\": \"Anna\",\n  \"email\": \"anna.meier@example.ch\",\n  \"stelle\": \"Chocolatier/in Produktion Lenzburg\",\n  \"standort\": \"lenzburg\",\n  \"bemerkung\": \"Zum Gespraech eingeladen am 01.09.2026\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Bemerkung uebernommen', () => pm.expect(pm.response.json().bemerkung).to.include('Gespraech'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Fremde Personalvermittlungsfirma sieht Bewerbung nicht -> 404",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{vermittlerToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }
+        }
+      ]
+    },
+    {
+      "name": "10 - Personalvermittlungsfirma darf nicht loeschen -> 403",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{vermittlerToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] }
+        }
+      ]
+    },
+    {
+      "name": "11 - Bewerbung loeschen (intern) -> 204",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{internToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }
+        }
+      ]
+    },
+    {
+      "name": "12 - Geloeschte Bewerbung erneut lesen -> 404",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{internToken}}" }],
+        "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }
+        }
+      ]
+    }
+  ]
+}

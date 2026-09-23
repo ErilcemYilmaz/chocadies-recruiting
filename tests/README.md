@@ -1,7 +1,45 @@
 # tests
 
-Postman-Collection fuer die API aus `api/openapi.yaml`. Automatisierung
-spaeter mit Newman in der CI/CD-Pipeline (GitHub Actions, Kapitel 4.4).
+Postman-Collection `chocadies-recruiting.postman_collection.json` fuer die
+API aus `api/openapi.yaml` (Kapitel 4.2.4). Deckt alle fuenf Operationen ab
+sowie die Fehlerfaelle 400, 401, 403, 404, 409. Automatisierung mit Newman
+folgt in der CI/CD-Pipeline (GitHub Actions, Kapitel 4.4).
 
-Noch offen: Collection aus der OpenAPI-Spezifikation generieren oder von
-Hand in Postman aufbauen und hier als `.postman_collection.json` ablegen.
+## Manuell in Postman ausfuehren
+
+1. Collection in Postman importieren (Datei > Import).
+2. Server lokal starten: im Ordner `server` `npm run dev` (setzt eine
+   funktionierende `.env` mit `MONGODB_URI` und `JWT_SECRET` voraus, siehe
+   `server/.env.example`).
+3. Test-Tokens erzeugen: im Ordner `server` `npm run token:intern` bzw.
+   `npm run token:vermittler -- firma-a` ausfuehren und die ausgegebenen
+   Tokens in die Collection-Variablen `internToken` bzw. `vermittlerToken`
+   eintragen (Collection > Variables).
+4. Collection mit "Run" der Reihe nach ausfuehren. Test 02 legt eine
+   Bewerbung an und setzt `bewerbungId` automatisch fuer die folgenden
+   Requests.
+
+## Mit Newman von der Kommandozeile
+
+```bash
+npm install -g newman
+newman run tests/chocadies-recruiting.postman_collection.json \
+  --env-var baseUrl=http://localhost:3000/v1 \
+  --env-var internToken=<token aus npm run token:intern> \
+  --env-var vermittlerToken=<token aus npm run token:vermittler>
+```
+
+## Bereits automatisiert verifiziert
+
+`server/tests/newman-smoke.test.ts` (Teil der Vitest-Suite, `npm run
+test:newman` im Ordner server) startet die Basis-Applikation mit einem
+In-Memory-Ersatz fuer die Datenbank und fuehrt dieselbe Collection per
+Newman dagegen aus. Damit ist sichergestellt, dass Collection und API
+tatsaechlich zusammenpassen, unabhaengig von einer echten
+MongoDB-Verbindung. Stand 24.08.2026: 12/12 Requests, 19/19 Assertions
+erfolgreich.
+
+Fuer die Abnahme gegen die echte Datenbank bitte zusaetzlich einmal `npm
+run dev` (mit echtem Atlas-Cluster) plus die manuelle oder Newman-Ausfuehrung
+oben durchspielen und das Ergebnis im Arbeitsprotokoll (Kapitel 4.2.4)
+festhalten.
