@@ -43,6 +43,15 @@ export interface IBewerbung extends Document {
   quelle?: Quelle;
   eingangsdatum: Date;
   aenderungsdatum?: Date;
+  /**
+   * Interne Kennung der Personalvermittlungsfirma, welche die Bewerbung
+   * eingereicht hat. Nicht Teil des oeffentlichen Bewerbung-Schemas aus
+   * api/openapi.yaml, dient ausschliesslich der Zugriffssteuerung (AUTH-
+   * Komponente): Personalvermittlungsfirmen sehen gemaess openapi.yaml
+   * (Zeilen 43-45) nur ihre eigenen Bewerbungen. Wird nie an den Client
+   * serialisiert, siehe controllers/bewerbung.controller.ts#serialisieren.
+   */
+  vermittlerId?: string;
 }
 
 const DokumentSchema = new Schema<IDokument>(
@@ -105,6 +114,7 @@ const BewerbungSchema = new Schema<IBewerbung>(
     },
     eingangsdatum: { type: Date, default: () => new Date(), immutable: true },
     aenderungsdatum: { type: Date },
+    vermittlerId: { type: String, select: true },
   },
   {
     // aenderungsdatum wird bei jedem Update automatisch nachgefuehrt.
@@ -117,5 +127,7 @@ const BewerbungSchema = new Schema<IBewerbung>(
 BewerbungSchema.index({ nachname: 'text', vorname: 'text', stelle: 'text' });
 // Filterung nach status und standort beschleunigen.
 BewerbungSchema.index({ status: 1, standort: 1 });
+// Zugriffsfilterung fuer Personalvermittlungsfirmen beschleunigen.
+BewerbungSchema.index({ vermittlerId: 1 });
 
 export const BewerbungModel = model<IBewerbung>('Bewerbung', BewerbungSchema, 'bewerbungen');

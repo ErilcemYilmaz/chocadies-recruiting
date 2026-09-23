@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, isValidObjectId } from 'mongoose';
 import {
   BewerbungModel,
   IBewerbung,
@@ -19,6 +19,8 @@ export interface SucheOptionen {
   standort?: Standort;
   seite?: number;
   proSeite?: number;
+  /** Schraenkt die Suche auf Bewerbungen einer bestimmten Personalvermittlungsfirma ein. */
+  vermittlerId?: string;
 }
 
 export interface Seitenergebnis<T> {
@@ -35,6 +37,7 @@ export class BewerbungRepository {
   }
 
   async findenNachId(id: string): Promise<IBewerbung | null> {
+    if (!isValidObjectId(id)) return null;
     return BewerbungModel.findById(id).exec();
   }
 
@@ -46,6 +49,7 @@ export class BewerbungRepository {
     if (optionen.status) filter.status = optionen.status;
     if (optionen.standort) filter.standort = optionen.standort;
     if (optionen.suchbegriff) filter.$text = { $search: optionen.suchbegriff };
+    if (optionen.vermittlerId) filter.vermittlerId = optionen.vermittlerId;
 
     const [treffer, gesamt] = await Promise.all([
       BewerbungModel.find(filter)
@@ -60,13 +64,16 @@ export class BewerbungRepository {
   }
 
   async aendern(id: string, daten: Partial<IBewerbung>): Promise<IBewerbung | null> {
+    if (!isValidObjectId(id)) return null;
     return BewerbungModel.findByIdAndUpdate(id, daten, {
       new: true,
       runValidators: true,
+      context: 'query',
     }).exec();
   }
 
   async loeschen(id: string): Promise<boolean> {
+    if (!isValidObjectId(id)) return false;
     const ergebnis = await BewerbungModel.findByIdAndDelete(id).exec();
     return ergebnis !== null;
   }
