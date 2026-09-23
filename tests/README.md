@@ -36,10 +36,11 @@ test:newman` im Ordner server) startet die Basis-Applikation mit einem
 In-Memory-Ersatz fuer die Datenbank und fuehrt dieselbe Collection per
 Newman dagegen aus. Damit ist sichergestellt, dass Collection und API
 tatsaechlich zusammenpassen, unabhaengig von einer echten
-MongoDB-Verbindung. Stand 24.08.2026: 12/12 Requests, 19/19 Assertions
-erfolgreich.
+MongoDB-Verbindung.
 
-Fuer die Abnahme gegen die echte Datenbank bitte zusaetzlich einmal `npm
-run dev` (mit echtem Atlas-Cluster) plus die manuelle oder Newman-Ausfuehrung
-oben durchspielen und das Ergebnis im Arbeitsprotokoll (Kapitel 4.2.4)
-festhalten.
+## Abnahme gegen MongoDB Atlas
+
+Am 23.09.2026 mit `npm run dev` gegen den echten Atlas-Cluster (M0,
+Frankfurt) und der Newman-Ausfuehrung oben: 12/12 Requests, 20/20
+Assertions erfolgreich. Die Collection raeumt ihre Testdaten selbst auf
+(Request 11 loescht die angelegte Bewerbung).
