@@ -159,16 +159,17 @@ paths:
       tags: [Bewerbungen]
       summary: Bewerbung aendern
       description: |
-        Ersetzt die aenderbaren Felder der Bewerbung. Ein Statuswechsel wird
-        protokolliert, damit die Auskunftspflicht nach DSG und DSGVO erfuellt
-        werden kann.
+        Ersetzt die aenderbaren Felder der Bewerbung. Den Status duerfen nur
+        interne Benutzende aendern. Ohne Feld status bleibt der bisherige
+        Status erhalten. Ein Statuswechsel wird protokolliert, damit die
+        Auskunftspflicht nach DSG und DSGVO erfuellt werden kann.
       operationId: bewerbungAendern
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BewerbungEingabe'
+              $ref: '#/components/schemas/BewerbungAenderung'
       responses:
         '200':
           description: Bewerbung wurde geaendert
@@ -180,6 +181,12 @@ paths:
           $ref: '#/components/responses/UngueltigeAnfrage'
         '401':
           $ref: '#/components/responses/NichtAuthentisiert'
+        '403':
+          description: Personalvermittlungsfirmen duerfen den Status nicht aendern
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fehler'
         '404':
           $ref: '#/components/responses/NichtGefunden'
 
@@ -264,9 +271,9 @@ components:
           format: uri
           description: Zeitlich befristete URL auf den Dokumentenspeicher.
 
-    BewerbungEingabe:
+    BewerbungFelder:
       type: object
-      description: Vom Aufrufer setzbare Felder einer Bewerbung.
+      description: Gemeinsame Felder von BewerbungEingabe und BewerbungAenderung.
       required: [nachname, vorname, email, stelle, standort]
       properties:
         nachname:
@@ -305,7 +312,24 @@ components:
           maxItems: 10
           items:
             $ref: '#/components/schemas/Dokument'
-      additionalProperties: false
+
+    BewerbungEingabe:
+      description: Vom Aufrufer setzbare Felder beim Anlegen einer Bewerbung.
+      allOf:
+        - $ref: '#/components/schemas/BewerbungFelder'
+      unevaluatedProperties: false
+
+    BewerbungAenderung:
+      description: |
+        Aenderbare Felder einer bestehenden Bewerbung. Zusaetzlich zu den
+        Feldern beim Anlegen kann der Status gesetzt werden, jedoch nur von
+        internen Benutzenden (sonst 403).
+      allOf:
+        - $ref: '#/components/schemas/BewerbungFelder'
+      properties:
+        status:
+          $ref: '#/components/schemas/Bewerbungsstatus'
+      unevaluatedProperties: false
 
     Bewerbung:
       type: object

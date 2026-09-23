@@ -3,6 +3,7 @@ import {
   BewerbungModel,
   IBewerbung,
   Bewerbungsstatus,
+  IStatusEintrag,
   Standort,
 } from '../models/Bewerbung.model.js';
 
@@ -63,9 +64,15 @@ export class BewerbungRepository {
     return { treffer, seite, proSeite, gesamt };
   }
 
-  async aendern(id: string, daten: Partial<IBewerbung>): Promise<IBewerbung | null> {
+  /** statuswechsel wird, falls angegeben, an den Statusverlauf angehaengt. */
+  async aendern(
+    id: string,
+    daten: Partial<IBewerbung>,
+    statuswechsel?: IStatusEintrag,
+  ): Promise<IBewerbung | null> {
     if (!isValidObjectId(id)) return null;
-    return BewerbungModel.findByIdAndUpdate(id, daten, {
+    const update = statuswechsel ? { ...daten, $push: { statusverlauf: statuswechsel } } : daten;
+    return BewerbungModel.findByIdAndUpdate(id, update, {
       new: true,
       runValidators: true,
       context: 'query',

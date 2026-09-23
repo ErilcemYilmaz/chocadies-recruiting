@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { bewerbungRepository } from '../repositories/bewerbung.repository.js';
 import { IBewerbung } from '../models/Bewerbung.model.js';
 import { ApiError } from '../errors/ApiError.js';
-import { BewerbungEingabe, SucheQuery } from '../schemas/bewerbung.schema.js';
+import { BewerbungAenderung, BewerbungEingabe, SucheQuery } from '../schemas/bewerbung.schema.js';
 
 /**
  * REST-Controller (Komponente CTRL, stellt Interface IBewerbungAPI bereit).
@@ -89,6 +89,7 @@ export async function bewerbungAnlegen(req: Request, res: Response, next: NextFu
       // Server anhand des Zugriffstokens gesetzt, nicht vom Aufrufer.
       quelle: istVermittler ? 'personalvermittlung' : undefined,
       vermittlerId: istVermittler ? req.auth?.firmaId : undefined,
+      statusverlauf: [{ status: 'eingegangen', zeitpunkt: new Date(), geaendertVon: req.auth!.sub }],
     });
 
     res.status(201).location(`/bewerbungen/${neu.id}`).json(serialisieren(neu));
@@ -115,8 +116,20 @@ export async function bewerbungAendern(req: Request, res: Response, next: NextFu
     if (!bestehend) throw ApiError.nichtGefunden();
     pruefeZugriff(req, bestehend);
 
-    // req.body wurde bereits durch validate(BewerbungEingabeSchema, 'body') geparst.
-    const geaendert = await bewerbungRepository.aendern(req.params.bewerbungId, req.body as BewerbungEingabe);
+    // req.body wurde bereits durch validate(BewerbungAenderungSchema, 'body') geparst.
+    const eingabe = req.body as BewerbungAenderung;
+
+    // Den Bearbeitungsstand fuehrt ausschliesslich die interne Personalabteilung.
+    if (eingabe.status !== undefined && req.auth?.scope !== 'intern') {
+      throw ApiError.keineBerechtigung('Nur interne Benutzende duerfen den Status aendern.');
+    }
+
+    const statuswechsel =
+      eingabe.status !== undefined && eingabe.status !== bestehend.status
+        ? { status: eingabe.status, zeitpunkt: new Date(), geaendertVon: req.auth!.sub }
+        : undefined;
+
+    const geaendert = await bewerbungRepository.aendern(req.params.bewerbungId, eingabe, statuswechsel);
     if (!geaendert) throw ApiError.nichtGefunden();
 
     res.status(200).json(serialisieren(geaendert));

@@ -51,6 +51,12 @@ export const BewerbungEingabeSchema = z
   })
   .strict();
 
+// requestBody von PUT /bewerbungen/{id} (Schema BewerbungAenderung):
+// zusaetzlich status, wer ihn setzen darf, prueft der Controller.
+export const BewerbungAenderungSchema = BewerbungEingabeSchema.extend({
+  status: BewerbungsstatusSchema.optional(),
+}).strict();
+
 export const SucheQuerySchema = z.object({
   suchbegriff: z.string().max(100).optional(),
   status: BewerbungsstatusSchema.optional(),
@@ -64,4 +70,5 @@ export const BewerbungIdParamSchema = z.object({
 });
 
 export type BewerbungEingabe = z.infer<typeof BewerbungEingabeSchema>;
+export type BewerbungAenderung = z.infer<typeof BewerbungAenderungSchema>;
 export type SucheQuery = z.infer<typeof SucheQuerySchema>;

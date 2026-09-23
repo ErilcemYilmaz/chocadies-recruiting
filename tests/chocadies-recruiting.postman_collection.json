@@ -178,7 +178,7 @@
         "url": "{{baseUrl}}/bewerbungen/{{bewerbungId}}",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nachname\": \"Meier\",\n  \"vorname\": \"Anna\",\n  \"email\": \"anna.meier@example.ch\",\n  \"stelle\": \"Chocolatier/in Produktion Lenzburg\",\n  \"standort\": \"lenzburg\",\n  \"bemerkung\": \"Zum Gespraech eingeladen am 01.09.2026\"\n}"
+          "raw": "{\n  \"nachname\": \"Meier\",\n  \"vorname\": \"Anna\",\n  \"email\": \"anna.meier@example.ch\",\n  \"stelle\": \"Chocolatier/in Produktion Lenzburg\",\n  \"standort\": \"lenzburg\",\n  \"status\": \"zum_gespraech_eingeladen\",\n  \"bemerkung\": \"Zum Gespraech eingeladen am 01.09.2026\"\n}"
         }
       },
       "event": [
@@ -187,7 +187,8 @@
           "script": {
             "exec": [
               "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('Bemerkung uebernommen', () => pm.expect(pm.response.json().bemerkung).to.include('Gespraech'));"
+              "pm.test('Bemerkung uebernommen', () => pm.expect(pm.response.json().bemerkung).to.include('Gespraech'));",
+              "pm.test('Status gewechselt', () => pm.expect(pm.response.json().status).to.eql('zum_gespraech_eingeladen'));"
             ]
           }
         }

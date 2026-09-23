@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import {
+  BewerbungAenderungSchema,
   BewerbungEingabeSchema,
   BewerbungIdParamSchema,
   SucheQuerySchema,
@@ -45,7 +46,7 @@ bewerbungRouter.put(
   '/bewerbungen/:bewerbungId',
   requireAuth,
   validate(BewerbungIdParamSchema, 'params'),
-  validate(BewerbungEingabeSchema, 'body'),
+  validate(BewerbungAenderungSchema, 'body'),
   bewerbungAendern,
 );
 

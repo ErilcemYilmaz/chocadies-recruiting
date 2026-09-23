@@ -29,6 +29,18 @@ export interface IDokument {
   url: string;
 }
 
+/**
+ * Eintrag im Statusverlauf. Erfuellt die Vorgabe aus api/openapi.yaml
+ * (PUT /bewerbungen/{id}), Statuswechsel fuer die Auskunftspflicht nach DSG
+ * und DSGVO zu protokollieren. Nur intern, wird nie an Clients ausgeliefert.
+ */
+export interface IStatusEintrag {
+  status: Bewerbungsstatus;
+  zeitpunkt: Date;
+  /** sub aus dem Zugriffstoken der aendernden Person. */
+  geaendertVon: string;
+}
+
 export interface IBewerbung extends Document {
   nachname: string;
   vorname: string;
@@ -52,6 +64,7 @@ export interface IBewerbung extends Document {
    * serialisiert, siehe controllers/bewerbung.controller.ts#serialisieren.
    */
   vermittlerId?: string;
+  statusverlauf: IStatusEintrag[];
 }
 
 const DokumentSchema = new Schema<IDokument>(
@@ -63,6 +76,19 @@ const DokumentSchema = new Schema<IDokument>(
       enum: ['lebenslauf', 'motivationsschreiben', 'zeugnis', 'sonstiges'],
     },
     url: { type: String, required: true },
+  },
+  { _id: false },
+);
+
+const StatusEintragSchema = new Schema<IStatusEintrag>(
+  {
+    status: {
+      type: String,
+      required: true,
+      enum: ['eingegangen', 'in_pruefung', 'zum_gespraech_eingeladen', 'abgelehnt', 'eingestellt'],
+    },
+    zeitpunkt: { type: Date, required: true },
+    geaendertVon: { type: String, required: true },
   },
   { _id: false },
 );
@@ -115,6 +141,7 @@ const BewerbungSchema = new Schema<IBewerbung>(
     eingangsdatum: { type: Date, default: () => new Date(), immutable: true },
     aenderungsdatum: { type: Date },
     vermittlerId: { type: String, select: true },
+    statusverlauf: { type: [StatusEintragSchema], default: [] },
   },
   {
     // aenderungsdatum wird bei jedem Update automatisch nachgefuehrt.

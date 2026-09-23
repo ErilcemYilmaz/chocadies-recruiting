@@ -214,6 +214,69 @@ describe('GET /v1/bewerbungen/:id', () => {
   });
 });
 
+describe('PUT /v1/bewerbungen/:id', () => {
+  it('erlaubt internen Benutzenden den Statuswechsel und protokolliert ihn', async () => {
+    vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(alsDbBewerbung() as never);
+    vi.mocked(bewerbungRepository.aendern).mockResolvedValue(
+      alsDbBewerbung({ status: 'in_pruefung' }) as never,
+    );
+
+    const res = await request(app)
+      .put('/v1/bewerbungen/6620f1a2c3d4e5f6a7b8c9d0')
+      .set('Authorization', `Bearer ${internToken()}`)
+      .send({ ...gueltigeBewerbung, status: 'in_pruefung' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('in_pruefung');
+    expect(res.body).not.toHaveProperty('statusverlauf');
+    expect(bewerbungRepository.aendern).toHaveBeenCalledWith(
+      '6620f1a2c3d4e5f6a7b8c9d0',
+      expect.objectContaining({ status: 'in_pruefung' }),
+      expect.objectContaining({ status: 'in_pruefung', geaendertVon: 'intern:test' }),
+    );
+  });
+
+  it('protokolliert nichts, wenn der Status gleich bleibt oder fehlt', async () => {
+    vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(alsDbBewerbung() as never);
+    vi.mocked(bewerbungRepository.aendern).mockResolvedValue(alsDbBewerbung() as never);
+
+    const res = await request(app)
+      .put('/v1/bewerbungen/6620f1a2c3d4e5f6a7b8c9d0')
+      .set('Authorization', `Bearer ${internToken()}`)
+      .send({ ...gueltigeBewerbung, bemerkung: 'nur Bemerkung' });
+
+    expect(res.status).toBe(200);
+    expect(bewerbungRepository.aendern).toHaveBeenCalledWith(
+      '6620f1a2c3d4e5f6a7b8c9d0',
+      expect.any(Object),
+      undefined,
+    );
+  });
+
+  it('verweigert Personalvermittlungsfirmen den Statuswechsel mit 403', async () => {
+    vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(
+      alsDbBewerbung({ vermittlerId: 'firma-a' }) as never,
+    );
+
+    const res = await request(app)
+      .put('/v1/bewerbungen/6620f1a2c3d4e5f6a7b8c9d0')
+      .set('Authorization', `Bearer ${vermittlerToken('firma-a')}`)
+      .send({ ...gueltigeBewerbung, status: 'eingestellt' });
+
+    expect(res.status).toBe(403);
+    expect(bewerbungRepository.aendern).not.toHaveBeenCalled();
+  });
+
+  it('weist einen unbekannten Status mit 400 zurueck', async () => {
+    const res = await request(app)
+      .put('/v1/bewerbungen/6620f1a2c3d4e5f6a7b8c9d0')
+      .set('Authorization', `Bearer ${internToken()}`)
+      .send({ ...gueltigeBewerbung, status: 'vielleicht' });
+
+    expect(res.status).toBe(400);
+  });
+});
+
 describe('DELETE /v1/bewerbungen/:id', () => {
   it('erlaubt internen Benutzenden das Loeschen (204)', async () => {
     vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(alsDbBewerbung() as never);
