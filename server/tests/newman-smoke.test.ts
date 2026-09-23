@@ -92,7 +92,8 @@ describe('Newman-Verifikation der Postman-Collection', () => {
             '--reporters',
             'cli',
           ],
-          { timeout: 60_000 },
+          // Unter Windows ist npx eine .cmd-Datei und laesst sich nur ueber die Shell starten.
+          { timeout: 60_000, shell: process.platform === 'win32' },
         );
         // execFileAsync wirft bereits bei einem Newman-Exitcode != 0 (d.h.
         // bei mindestens einem fehlgeschlagenen Test). Zusaetzlich pruefen,
