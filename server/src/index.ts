@@ -1,10 +1,15 @@
+import { buildApp } from './app.js';
 import { connectDb } from './config/db.js';
 import { env } from './config/env.js';
 
 async function main() {
   await connectDb();
   console.log(`[Server] MongoDB-Verbindung steht. NODE_ENV=${env.nodeEnv}`);
-  // TODO Kapitel 4.2: Express-App, REST-Controller, Auth- und Validierungs-Middleware.
+
+  const app = buildApp();
+  app.listen(env.port, () => {
+    console.log(`[Server] Basis-Applikation laeuft auf http://localhost:${env.port}/v1`);
+  });
 }
 
 main().catch((err) => {
