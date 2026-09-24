@@ -24,3 +24,6 @@ Thumbs.db
 # Schriftliche Arbeit (entsteht im Claude-Projekt, nicht im Repo)
 *.docx
 ~$*
+
+# Aufgabenstellung und Leitfaeden der WISS (nur lokal)
+docs/*.pdf

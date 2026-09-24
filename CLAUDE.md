@@ -15,8 +15,9 @@ Personalgewinnungsplattform der Chocolatier Chocadies AG).
 
 ## Nach jedem Arbeitsblock
 
-1. Tests laufen lassen (`cd server && npm test && npm run test:newman && npm run build`)
-   und das tatsaechliche Ergebnis festhalten, nicht das erwartete.
+1. Tests laufen lassen (`cd server && npm test && npm run test:newman && npm run build`,
+   `cd web && npm test && npm run build`) und das tatsaechliche Ergebnis
+   festhalten, nicht das erwartete.
 2. Uebergabe-Datei `docs/uebergabe/JJJJ-MM-TT_<kapitel>-<thema>.md` nach
    `docs/uebergabe/_vorlage.md` schreiben. Sie ist die einzige Quelle, aus der
    das Claude-Projekt technische Fakten uebernimmt, also nur Belegbares.
@@ -35,8 +36,12 @@ Personalgewinnungsplattform der Chocolatier Chocadies AG).
 - Schichten gemaess `docs/architektur_komponenten.puml`: Routen -> Middleware
   (Auth, Validierung) -> Controller -> Repository (Data-Access-Layer) -> Mongoose.
 - Bezeichner und Kommentare auf Deutsch, ohne Umlaute im Code (ae/oe/ue).
-- Secrets nie ins Repo: `server/.env` und `server/.env.example` sind lokal
-  und per `.gitignore` ausgeschlossen. Benoetigte Variablen stehen im README.
+- Secrets nie ins Repo: `server/.env`, `server/.env.example` und
+  `web/.env.local` sind lokal und per `.gitignore` ausgeschlossen. Benoetigte
+  Variablen stehen in den READMEs.
+- SPA: eigenes CSS mit Variablen aus `web/src/styles/variablen.css`, keine
+  UI-Bibliothek. Sichtbare Texte nur aus `web/src/i18n/uebersetzungen.ts`,
+  Anzeigenamen der API-Enums nur aus `web/src/i18n/anzeigenamen.ts`.
 - Entwicklung unter Windows: Skripte und Tests muessen dort laufen.
 
 ## Kapitelzuordnung

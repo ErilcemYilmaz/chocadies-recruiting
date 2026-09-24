@@ -36,6 +36,18 @@ JWT_SECRET=<langer zufaelliger Wert>
 Test-Tokens fuer Postman: `npm run token:intern` bzw.
 `npm run token:vermittler -- <firmaId>`.
 
+## Web-App lokal starten
+
+Server wie oben starten, dann:
+
+```bash
+cd web
+npm install
+# web/.env.local mit Demo-Anmeldung und Token anlegen, siehe web/README.md
+npm run dev            # SPA unter http://localhost:5173
+npm test               # Vitest + Testing Library, ohne Server
+```
+
 ## Arbeitsweise
 
 Code und technische Artefakte entstehen mit Claude Code in diesem Repo,
