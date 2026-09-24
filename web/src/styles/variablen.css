@@ -1,0 +1,69 @@
+/*
+ * Gestaltungsvariablen der SPA. Alle Farben, Abstaende und Radien werden
+ * nur hier definiert. Abstaende folgen einem 8-px-Raster (--r-1 = 8px).
+ * Farbkontraste gegen WCAG 2.2 AA geprueft (Text >= 4.5:1).
+ */
+:root {
+  /* Farben */
+  --farbe-akzent: #4a2c1d; /* Chocadies-Braun, Primaerknoepfe und Links */
+  --farbe-akzent-hover: #3a2216;
+  --farbe-akzent-hell: #f4ede9;
+  --farbe-hintergrund: #f3f4f6;
+  --farbe-flaeche: #ffffff;
+  --farbe-flaeche-gedaempft: #f9fafb;
+  --farbe-rahmen: #e5e7eb;
+  --farbe-rahmen-stark: #d1d5db;
+  --farbe-text: #111827;
+  --farbe-text-gedaempft: #4b5563; /* 7.6:1 auf Weiss */
+  --farbe-text-platzhalter: #6b7280; /* 4.8:1 auf Weiss */
+
+  --farbe-seitenleiste: #1f2937;
+  --farbe-seitenleiste-text: #d1d5db;
+  --farbe-seitenleiste-gedaempft: #9ca3af;
+  --farbe-seitenleiste-aktiv: #5a3423;
+
+  --farbe-gefahr: #dc2626;
+  --farbe-gefahr-text: #b91c1c;
+  --farbe-gefahr-hell: #fee2e2;
+  --farbe-warnung-hintergrund: #fef3c7;
+  --farbe-warnung-rahmen: #f59e0b;
+  --farbe-warnung-text: #92400e;
+  --farbe-erfolg-hintergrund: #ecfdf5;
+  --farbe-erfolg-rahmen: #6ee7b7;
+  --farbe-erfolg-text: #065f46;
+  --farbe-badge: #e5e7eb;
+  --farbe-badge-text: #374151;
+
+  --farbe-fokus: #4a2c1d;
+  --farbe-fokus-hell: #fbbf24; /* Fokus auf dunkler Seitenleiste */
+
+  /* Schrift */
+  --schrift: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --schrift-xs: 0.75rem; /* 12px */
+  --schrift-s: 0.875rem; /* 14px */
+  --schrift-m: 1rem; /* 16px */
+  --schrift-l: 1.125rem; /* 18px */
+  --schrift-l2: 1.375rem; /* 22px, Titel der Anmeldung */
+  --schrift-xl: 1.5rem; /* 24px */
+  --schrift-xxl: 2rem; /* 32px */
+
+  /* 8-px-Raster */
+  --r-halb: 4px;
+  --r-1: 8px;
+  --r-1h: 12px; /* 1.5 Raster, fuer Innenabstaende von Eingaben und Listen */
+  --r-2: 16px;
+  --r-3: 24px;
+  --r-4: 32px;
+  --r-5: 40px;
+  --r-6: 48px;
+
+  --radius: 8px;
+  --radius-klein: 4px;
+  --radius-rund: 999px;
+  --schatten: 0 1px 2px rgb(0 0 0 / 5%);
+  --schatten-dialog: 0 16px 48px rgb(0 0 0 / 25%);
+
+  --seitenleiste-breite: 240px;
+  --eingabe-hoehe: 40px;
+  --bruchpunkt-mobil: 768px; /* nur Dokumentation, Media Queries brauchen den Wert direkt */
+}
