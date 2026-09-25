@@ -1,0 +1,10 @@
+# .env.local enthaelt Demo-Passwort und Token: nie in den Build-Kontext.
+# Die Werte kommen bei Bedarf als Build-Argumente (docker-compose.yml).
+node_modules
+dist
+.env
+.env.*
+*.local
+tsconfig.tsbuildinfo
+Dockerfile
+.dockerignore

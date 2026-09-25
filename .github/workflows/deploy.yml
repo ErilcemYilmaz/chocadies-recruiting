@@ -1,0 +1,96 @@
+# Continuous Deployment (Kapitel 4.4.1).
+#
+# Ablauf: Nach einem gruenen CI-Lauf auf main (Push) wird das eben gebaute
+# Image-Tag (Commit-SHA) automatisch nach Staging ausgerollt. Produktion folgt
+# erst nach manueller Freigabe: Das GitHub Environment "production" verlangt
+# eine Pruefperson (Settings > Environments > production > Required reviewers).
+#
+# Rollback: "Run workflow" (workflow_dispatch) mit einem frueheren Image-Tag
+# starten, siehe docs/deployment.md.
+#
+# WICHTIG: Solange die Azure-Secrets (AZURE_CLIENT_ID, AZURE_TENANT_ID,
+# AZURE_SUBSCRIPTION_ID) im Repository fehlen, ist noch keine Azure-Umgebung
+# angebunden. Der Workflow ist trotzdem vollstaendig definiert, ueberspringt
+# Staging und Produktion dann aber sauber (Job "vorbereitung" meldet es in der
+# Zusammenfassung), statt mit einem Fehler abzubrechen.
+
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image-Tag (Commit-SHA) fuer Rollback oder erneutes Ausrollen"
+        required: true
+        type: string
+
+# Deployments nie parallel und nie gegenseitig abbrechen.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  vorbereitung:
+    name: Vorbereitung
+    # Automatisch nur nach erfolgreichem CI eines Pushs (keine Pull Requests).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      aktiv: ${{ steps.pruefung.outputs.aktiv }}
+      tag: ${{ steps.pruefung.outputs.tag }}
+    steps:
+      - name: Azure-Anbindung und Image-Tag pruefen
+        id: pruefung
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TAG: ${{ github.event.inputs.image_tag || github.event.workflow_run.head_sha }}
+        run: |
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+            echo "aktiv=true" >> "$GITHUB_OUTPUT"
+            echo "Deployment von Image-Tag \`$TAG\` wird gestartet." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "aktiv=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Azure-Secrets fehlen, Deployment wird uebersprungen (siehe docs/deployment.md)."
+            {
+              echo "### Deployment uebersprungen"
+              echo "Die Secrets AZURE_CLIENT_ID, AZURE_TENANT_ID und AZURE_SUBSCRIPTION_ID sind nicht gesetzt."
+              echo "Image-Tag \`$TAG\` liegt in GHCR bereit und kann spaeter ausgerollt werden."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  staging:
+    name: Staging
+    needs: vorbereitung
+    if: needs.vorbereitung.outputs.aktiv == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/_deploy-umgebung.yml
+    with:
+      umgebung: staging
+      tag: ${{ needs.vorbereitung.outputs.tag }}
+    secrets: inherit
+
+  produktion:
+    name: Produktion
+    needs: [vorbereitung, staging]
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/_deploy-umgebung.yml
+    with:
+      umgebung: production
+      tag: ${{ needs.vorbereitung.outputs.tag }}
+    secrets: inherit

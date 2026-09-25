@@ -1,0 +1,10 @@
+# Nur was das Image braucht; Zugangsdaten und lokale Artefakte bleiben draussen.
+node_modules
+dist
+.env
+.env.*
+*.log
+tests
+coverage
+Dockerfile
+.dockerignore

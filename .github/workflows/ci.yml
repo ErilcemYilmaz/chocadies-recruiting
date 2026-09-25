@@ -1,0 +1,157 @@
+# Continuous Integration (Kapitel 4.4.1).
+#
+# Bei jedem Push und Pull Request: Server-App und SPA bauen und testen,
+# OpenAPI-Spezifikation validieren, Produktivabhaengigkeiten auf bekannte
+# Schwachstellen pruefen und beide Container-Images bauen und im Verbund
+# starten (Rauchtest). Nur auf main und nur wenn alles gruen ist, werden die
+# Images mit Commit-SHA und "latest" in die GitHub Container Registry (GHCR)
+# gepusht. Das Deployment startet danach separat (deploy.yml).
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Neuere Laeufe auf demselben Branch brechen aeltere ab.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimalrechte; nur der Job "images" erhaelt Schreibrecht auf Pakete.
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: Server-App (Build, Tests, Newman, Audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      # Vitest/Supertest, Repository gemockt: keine Datenbank noetig.
+      - run: npm test
+      # Postman-Collection per Newman gegen die App (ebenfalls ohne Datenbank).
+      - run: npm run test:newman
+      - name: npm audit (Produktivabhaengigkeiten, ab high)
+        run: npm audit --omit=dev --audit-level=high
+
+  web:
+    name: SPA Web-App (Build, Tests, Audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: npm audit (Produktivabhaengigkeiten, ab high)
+        run: npm audit --omit=dev --audit-level=high
+
+  api:
+    name: OpenAPI-Spezifikation validieren
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # Version fixiert, damit neue Regeln der CLI den Build nicht unerwartet brechen.
+      - run: npx --yes @redocly/cli@2.54.3 lint api/openapi.yaml
+
+  container:
+    name: Container bauen und Rauchtest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Images bauen
+        run: |
+          docker build -t chocadies-server:ci server
+          docker build -t chocadies-web:ci web
+      # Startet beide Images mit einer Wegwerf-MongoDB im selben Netz und prueft
+      # die Kette von aussen: nginx -> Server-App -> Datenbank.
+      - name: Rauchtest
+        run: |
+          docker network create ci
+          docker run -d --name mongo --network ci mongo:7
+          docker run -d --name server --network ci \
+            -e MONGODB_URI=mongodb://mongo:27017/chocadies-ci \
+            -e JWT_SECRET=nur-fuer-ci \
+            chocadies-server:ci
+          # Warten, bis der Docker-HEALTHCHECK der Server-App gruen ist.
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' server)" = healthy ] && break
+            sleep 2
+          done
+          docker inspect -f 'Server: {{.State.Health.Status}}' server
+          docker run -d --name web --network ci -p 8080:80 \
+            -e API_UPSTREAM=http://server:3000 chocadies-web:ci
+          sleep 3
+          set -x
+          curl -fsS http://localhost:8080/health | grep -q '"ok"'
+          curl -fsS http://localhost:8080/ | grep -q '<div id="root">'
+          # SPA-Fallback: tiefer Link liefert index.html
+          curl -fsS http://localhost:8080/bewerbungen/123 | grep -q '<div id="root">'
+          # API ueber nginx erreichbar und geschuetzt: ohne Token 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/v1/bewerbungen)" = 401
+          curl -fsSI http://localhost:8080/ | grep -qi 'content-security-policy'
+          # Laeuft nicht als root
+          test "$(docker exec server id -u)" != 0
+      - name: Container-Logs bei Fehler
+        if: failure()
+        run: |
+          docker logs server || true
+          docker logs web || true
+
+  images:
+    name: Images nach GHCR pushen
+    # Nur auf main, nur bei Push (nicht bei Pull Requests), nur wenn alles gruen.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [server, web, api, container]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: [server, web]
+    steps:
+      - uses: actions/checkout@v7
+      # GHCR verlangt Kleinbuchstaben, der Kontoname enthaelt Grossbuchstaben.
+      - name: Image-Namen bestimmen
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/chocadies-recruiting-${{ matrix.app }}" >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.app }}
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}

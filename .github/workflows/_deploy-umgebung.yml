@@ -1,0 +1,95 @@
+# Wiederverwendbarer Deploy-Schritt fuer eine Umgebung (staging oder
+# production), aufgerufen von deploy.yml. Rollt beide Container-Images mit
+# demselben Tag auf Azure Container Apps (Region Switzerland North) aus.
+#
+# Benoetigt im GitHub Environment <umgebung>:
+#   Variablen: AZURE_RESOURCE_GROUP, CONTAINERAPP_SERVER, CONTAINERAPP_WEB
+#   Secrets:   MONGODB_URI, JWT_SECRET
+# und im Repository die Secrets AZURE_CLIENT_ID, AZURE_TENANT_ID,
+# AZURE_SUBSCRIPTION_ID (Anmeldung per OIDC, kein Passwort gespeichert).
+# Einmalige Einrichtung der Azure-Ressourcen: docs/deployment.md.
+
+name: Deploy-Umgebung
+
+on:
+  workflow_call:
+    inputs:
+      umgebung:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Ausrollen (${{ inputs.umgebung }})
+    runs-on: ubuntu-latest
+    # Das Environment bestimmt Secrets/Variablen und, bei "production", die
+    # manuelle Freigabe durch eine Pruefperson.
+    environment:
+      name: ${{ inputs.umgebung }}
+      url: ${{ steps.pruefen.outputs.url }}
+    env:
+      RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+      APP_SERVER: ${{ vars.CONTAINERAPP_SERVER }}
+      APP_WEB: ${{ vars.CONTAINERAPP_WEB }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Image-Namen bestimmen
+        run: echo "REGISTRY=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      # OIDC: GitHub stellt ein kurzlebiges Token aus, Azure vertraut ihm ueber
+      # eine Federated Credential. Es liegt kein Client-Secret im Repository.
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Secrets der Server-App aktualisieren
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          az containerapp secret set -n "$APP_SERVER" -g "$RG" \
+            --secrets "mongodb-uri=$MONGODB_URI" "jwt-secret=$JWT_SECRET" \
+            --output none
+
+      - name: Server-App ausrollen
+        run: |
+          az containerapp update -n "$APP_SERVER" -g "$RG" \
+            --image "$REGISTRY/chocadies-recruiting-server:$TAG" \
+            --set-env-vars NODE_ENV=production PORT=3000 \
+              MONGODB_URI=secretref:mongodb-uri JWT_SECRET=secretref:jwt-secret \
+            --output none
+
+      # Die SPA erreicht die Server-App ueber deren internen Namen in derselben
+      # Container-Apps-Umgebung (interner Ingress, nicht oeffentlich).
+      - name: SPA ausrollen
+        run: |
+          az containerapp update -n "$APP_WEB" -g "$RG" \
+            --image "$REGISTRY/chocadies-recruiting-web:$TAG" \
+            --set-env-vars "API_UPSTREAM=http://$APP_SERVER" \
+            --output none
+
+      - name: Rauchtest ueber die oeffentliche Adresse
+        id: pruefen
+        run: |
+          FQDN=$(az containerapp show -n "$APP_WEB" -g "$RG" --query properties.configuration.ingress.fqdn -o tsv)
+          echo "url=https://$FQDN" >> "$GITHUB_OUTPUT"
+          # Neue Revision braucht einige Sekunden; /health prueft nginx und Server-App.
+          for i in $(seq 1 20); do
+            curl -fsS "https://$FQDN/health" && exit 0
+            sleep 10
+          done
+          echo "::error::https://$FQDN/health antwortet nicht."
+          exit 1
+
+      - name: Zusammenfassung
+        run: |
+          echo "Umgebung **${{ inputs.umgebung }}**: Tag \`$TAG\` ausgerollt." >> "$GITHUB_STEP_SUMMARY"

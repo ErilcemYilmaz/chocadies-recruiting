@@ -1,0 +1,49 @@
+# nginx-Konfiguration der SPA (Vorlage, ${API_UPSTREAM} wird beim Start ersetzt).
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # Sicherheits-Header. Die CSP erlaubt nur eigene Ressourcen; data: fuer
+    # Favicon und das Pfeil-Icon der Auswahllisten (Inline-SVG im CSS).
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    # API unter demselben Ursprung wie die SPA (wie der Vite-Proxy in der
+    # Entwicklung), deshalb braucht die Server-App keine CORS-Header.
+    location /v1/ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Gesundheitspruefung der ganzen Kette (nginx -> Server-App).
+    location = /health {
+        proxy_pass ${API_UPSTREAM}/health;
+    }
+
+    # Von Vite gehashte Dateien duerfen lange zwischengespeichert werden.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        # add_header in einem location-Block ersetzt die Header von oben,
+        # deshalb die Sicherheits-Header hier wiederholen.
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # SPA-Fallback: unbekannte Pfade (z.B. /bewerbungen/123) liefern
+    # index.html, React Router uebernimmt die Navigation im Browser.
+    location / {
+        add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+        try_files $uri $uri/ /index.html;
+    }
+}
