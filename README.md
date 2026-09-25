@@ -48,6 +48,17 @@ npm run dev            # SPA unter http://localhost:5173
 npm test               # Vitest + Testing Library, ohne Server
 ```
 
+## Container und Deployment
+
+Beide Apps als Container lokal starten:
+
+```bash
+docker compose --env-file web/.env.local up --build   # SPA unter http://localhost:8080
+```
+
+CI/CD (GitHub Actions, GHCR, Azure Container Apps), Secrets und Rollback:
+siehe `docs/deployment.md`.
+
 ## Arbeitsweise
 
 Code und technische Artefakte entstehen mit Claude Code in diesem Repo,
