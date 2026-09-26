@@ -3,10 +3,8 @@ import type { Sprache } from '../api/typen';
 import { uebersetzungen, type Texte } from './uebersetzungen';
 
 /**
- * Sprachumschaltung DE/FR. Die gewaehlte Sprache wird im Browser gemerkt
- * (reine Komfortfunktion, faellt bei gesperrtem Speicher auf Deutsch zurueck)
- * und als lang-Attribut am html-Element gesetzt, damit Screenreader die
- * richtige Aussprache verwenden.
+ * Sprachumschaltung DE/FR. Die Wahl wird im Browser gemerkt und als
+ * lang-Attribut gesetzt (richtige Aussprache fuer Screenreader).
  */
 
 const SPEICHER_SCHLUESSEL = 'chocadies.sprache';

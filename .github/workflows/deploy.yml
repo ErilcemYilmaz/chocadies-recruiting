@@ -1,4 +1,4 @@
-# Continuous Deployment (Kapitel 4.4.1).
+# Continuous Deployment.
 #
 # Ablauf: Nach einem gruenen CI-Lauf auf main (Push) wird das eben gebaute
 # Image-Tag (Commit-SHA) automatisch nach Staging ausgerollt. Produktion folgt

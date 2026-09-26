@@ -15,10 +15,8 @@ import {
   bewerbungenSuchen,
 } from '../controllers/bewerbung.controller.js';
 
-// Bildet den Pfad /bewerbungen aus api/openapi.yaml 1:1 ab. Jede Route ist
-// zuerst durch requireAuth (Interface IBewerbungAPI erfordert bearerAuth)
-// und danach durch die passende Zod-Validierung abgesichert, bevor der
-// Controller (Bewerbungsdienst-nahe REST-Schicht) aufgerufen wird.
+// Pfad /bewerbungen aus api/openapi.yaml. Jede Route: erst Authentisierung,
+// dann Validierung, dann Controller.
 export const bewerbungRouter = Router();
 
 bewerbungRouter.get(

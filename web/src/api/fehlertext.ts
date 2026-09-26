@@ -11,9 +11,8 @@ export function fehlertext(fehler: unknown, t: Texte): string {
 const FORMULARFELDER: Feldname[] = ['nachname', 'vorname', 'email', 'telefon', 'stelle', 'standort', 'sprache', 'bemerkung', 'dokumente', 'status'];
 
 /**
- * Uebersetzt details einer 400-Antwort (feld z.B. "email" oder
- * "dokumente.0.url") in Feldfehler. Die Servermeldung selbst ist technisch
- * und nur deutsch, deshalb wird ein allgemeiner Text beim Feld angezeigt.
+ * Ordnet die details einer 400-Antwort (z.B. "email", "dokumente.0.url") den
+ * Formularfeldern zu. Angezeigt wird ein uebersetzter, allgemeiner Text.
  */
 export function serverFeldfehler(fehler: ApiFehler, t: Texte): Feldfehler {
   const ergebnis: Feldfehler = {};

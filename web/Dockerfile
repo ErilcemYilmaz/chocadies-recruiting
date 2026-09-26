@@ -1,4 +1,4 @@
-# SPA Web-App (Kapitel 4.3) als Container-Image, Kapitel 4.4.1.
+# SPA Web-App als Container-Image.
 # Stufe "build" erzeugt mit Vite statische Dateien, Stufe "runtime" liefert
 # sie mit nginx aus und leitet /v1 an die Server-App weiter.
 

@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-// Prototyp-Anmeldung, Werte aus web/.env.local (nie committen, siehe README).
+// Prototyp-Anmeldung aus web/.env.local (siehe README).
 interface ImportMetaEnv {
   readonly VITE_DEMO_EMAIL?: string;
   readonly VITE_DEMO_PASSWORT?: string;

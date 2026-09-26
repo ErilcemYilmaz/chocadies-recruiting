@@ -1,4 +1,4 @@
-# Server-App (Kapitel 4.2) als Container-Image, Kapitel 4.4.1.
+# Server-App als Container-Image.
 # Multi-Stage: Stufe "build" kompiliert TypeScript mit allen Abhaengigkeiten,
 # Stufe "runtime" enthaelt nur das kompilierte JavaScript und die
 # Produktivabhaengigkeiten (kein TypeScript, kein Vitest, keine Quellen).

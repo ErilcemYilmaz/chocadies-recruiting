@@ -11,11 +11,7 @@ interface Props {
   beiSchliessen?: () => void;
 }
 
-/**
- * Seitenleiste aller angemeldeten Screens (S2 bis S6): Marke, Navigation,
- * angemeldete Person, Sprachumschaltung und Abmelden. Ab 768 px fest links,
- * darunter als Schublade hinter dem Hamburger-Menue (siehe Layout).
- */
+/** Seitenleiste (S2 bis S6): Navigation, angemeldete Person, Sprache, Abmelden. */
 export function Seitenleiste({ id, alsSchublade = false, beiSchliessen }: Props) {
   const { t } = useSprache();
   const { benutzer, abmelden } = useAuth();

@@ -11,12 +11,8 @@ process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'test-secret';
 process.env.MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/test';
 
 /**
- * NICHT Teil der Abgabe-Dokumentation: interner Verifikationstest, der die
- * echte Postman-Collection (tests/chocadies-recruiting.postman_collection.json)
- * per Newman gegen die Basis-Applikation laufen laesst. Die Persistenz wird
- * wie in tests/api.test.ts gemockt, damit dieser Test ohne echten
- * MongoDB-Zugriff durchlaeuft. Dient nur dazu, vor der Abgabe zu pruefen,
- * dass Collection und API tatsaechlich zusammenpassen.
+ * Fuehrt die Postman-Collection per Newman gegen die App aus. Das Repository
+ * ist durch einen In-Memory-Speicher ersetzt, es braucht keine Datenbank.
  */
 vi.mock('../src/repositories/bewerbung.repository.js', () => {
   const store = new Map<string, Record<string, unknown>>();
@@ -95,9 +91,7 @@ describe('Newman-Verifikation der Postman-Collection', () => {
           // Unter Windows ist npx eine .cmd-Datei und laesst sich nur ueber die Shell starten.
           { timeout: 60_000, shell: process.platform === 'win32' },
         );
-        // execFileAsync wirft bereits bei einem Newman-Exitcode != 0 (d.h.
-        // bei mindestens einem fehlgeschlagenen Test). Zusaetzlich pruefen,
-        // dass kein Fehlschlag-Symbol im Bericht auftaucht.
+        // Newman-Fehler fuehren bereits zu einer Exception; zusaetzlich den Bericht pruefen.
         expect(stdout).not.toMatch(/✗|AssertionError/);
         expect(stdout).toMatch(/requests\s*│\s*12\s*│\s*0/);
       } finally {

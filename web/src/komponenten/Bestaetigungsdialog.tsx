@@ -14,13 +14,9 @@ interface Props {
 }
 
 /**
- * Modaler Bestaetigungsdialog (S6). Tastaturbedienung nach WAI-ARIA
- * Authoring Practices "Alert Dialog":
- * - Fokus startet auf "Abbrechen" (sichere Wahl bei einer endgueltigen Aktion),
- * - Tab/Shift+Tab bleiben im Dialog (Fokusfalle),
- * - Escape bricht ab,
- * - nach dem Schliessen kehrt der Fokus zum ausloesenden Element zurueck.
- * Nicht mit <dialog>.showModal() umgesetzt, weil jsdom (Tests) es nicht kennt.
+ * Modaler Bestaetigungsdialog (S6), Tastaturbedienung nach dem Muster
+ * "Alert Dialog" (WAI-ARIA): Fokus startet auf "Abbrechen", Tab bleibt im
+ * Dialog, Escape bricht ab, danach kehrt der Fokus zum Ausloeser zurueck.
  */
 export function Bestaetigungsdialog({
   titel,

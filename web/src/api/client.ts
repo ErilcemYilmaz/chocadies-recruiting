@@ -8,9 +8,8 @@ import type {
 } from './typen';
 
 /**
- * HTTP-Client der SPA fuer die Web-API (Interface IBewerbungAPI). Einzige
- * Stelle, die fetch aufruft und das Bearer-Token setzt. Die Seiten kennen
- * nur bewerbungApi und ApiFehler.
+ * HTTP-Client fuer die Web-API: einzige Stelle, die fetch aufruft und das
+ * Bearer-Token setzt.
  */
 
 const BASIS_URL = '/v1';

@@ -2,9 +2,8 @@ import type { BewerbungAenderung, Bewerbungsstatus, Dokument, Sprache, Standort 
 import type { Texte } from '../../i18n/uebersetzungen';
 
 /**
- * Clientseitige Pruefung, gespiegelt aus den Constraints von
- * BewerbungEingabe in api/openapi.yaml (und server/src/schemas). Sie ersetzt
- * die Serverpruefung nicht, sondern zeigt Fehler sofort beim Feld an.
+ * Clientseitige Pruefung nach den Constraints aus api/openapi.yaml. Zeigt
+ * Fehler sofort beim Feld; massgeblich bleibt die Pruefung im Server.
  */
 
 export interface Formularwerte {
@@ -86,9 +85,8 @@ export function pruefeAlle(werte: Formularwerte, t: Texte): Feldfehler {
 }
 
 /**
- * Baut den Anfragekoerper. Leere optionale Felder werden weggelassen, weil
- * die API leere Strings z.B. beim Telefon als ungueltig ablehnt. Ausnahme
- * Bemerkung beim Bearbeiten: Ein leerer String loescht die bisherige Bemerkung.
+ * Baut den Anfragekoerper. Leere optionale Felder werden weggelassen; beim
+ * Bearbeiten entfernt der Server sie dadurch.
  */
 export function alsAnfrage(werte: Formularwerte, bearbeiten: boolean): BewerbungAenderung {
   const anfrage: BewerbungAenderung = {

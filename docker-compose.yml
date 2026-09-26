@@ -1,4 +1,4 @@
-# Lokaler Betrieb beider Container (Kapitel 4.4.1), siehe docs/deployment.md.
+# Lokaler Betrieb beider Container, siehe docs/deployment.md.
 #
 #   docker compose --env-file web/.env.local up --build
 #

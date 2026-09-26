@@ -3,12 +3,9 @@ import { ZodError } from 'zod';
 import { ApiError } from '../errors/ApiError.js';
 
 /**
- * Zentraler Error-Handler (letzte Middleware in app.ts). Uebersetzt jeden
- * Fehler in das einheitliche Fehler-Schema aus api/openapi.yaml.
- * Muss als letztes Argument eine Fehlerfunktion mit 4 Parametern sein,
- * damit Express sie als Error-Handling-Middleware erkennt.
+ * Zentraler Error-Handler: uebersetzt jeden Fehler in das Fehler-Schema aus
+ * api/openapi.yaml. Express erkennt ihn an den vier Parametern.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction): void {
   if (err instanceof ApiError) {
     res.status(err.status).json({

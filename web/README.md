@@ -1,8 +1,8 @@
 # web
 
-SPA Web-App der Chocadies Recruiting-Plattform (Kapitel 4.3): React 19,
-Vite, TypeScript, eigenes CSS ohne UI-Bibliothek. Umsetzung der Wireframes
-`docs/wireframes/` (S1 bis S6, S2 mobil).
+SPA Web-App der Chocadies Recruiting-Plattform: React 19, Vite, TypeScript,
+eigenes CSS ohne UI-Bibliothek. Die Screens S1 bis S6 entsprechen den
+Wireframes der Arbeit.
 
 ## Starten
 
@@ -49,20 +49,3 @@ Browser-Bundle und sind nur fuer die lokale Entwicklung gedacht.
 | `src/seiten/` | Screens S1 bis S5 (S6 ist der Dialog auf S3) |
 | `src/styles/` | `variablen.css` (Farben, Schrift, 8-px-Raster), `app.css` |
 | `tests/` | Komponententests: Loeschdialog, Sprachumschaltung, Formular |
-| `e2e/` | Playwright: Systemtest 4.4.3, Screenshots 4.3 |
-
-## End-to-End-Test (Playwright)
-
-Laeuft in Chrome gegen die gestartete Anwendung (Standard
-http://localhost:8080, aenderbar mit `E2E_BASE_URL`). Voraussetzungen:
-Container laufen, Testdaten angelegt (`cd server && npm run testdaten:anlegen`),
-Demo-Anmeldung in `web/.env.local`.
-
-```bash
-npm run test:e2e                          # Systemtest 4.4.3 + Screenshots 4.3
-npx playwright test e2e/systemtest.spec.ts
-```
-
-Screenshots: `docs/systemtest/` (Systemtest) und `docs/screenshots/4.3/`
-(Oberflaeche). Die Testfaelle veraendern Testdaten, vor einem neuen Lauf die
-Testdaten neu anlegen.

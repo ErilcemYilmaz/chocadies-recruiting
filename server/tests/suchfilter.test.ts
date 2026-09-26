@@ -16,7 +16,7 @@ function trifft(suchbegriff: string, felder: { nachname: string; vorname: string
 const rochat = { nachname: 'Rochat', vorname: 'Claudine', stelle: 'Konditorin' };
 const keller = { nachname: 'Keller', vorname: 'Anna', stelle: 'Chocolatier/in Produktion Lenzburg' };
 
-describe('Suchfilter (Befund B-2, Teilwortsuche)', () => {
+describe('Suchfilter (Suche nach Wortanfang)', () => {
   it('findet Wortanfaenge ohne Gross-/Kleinschreibung', () => {
     expect(trifft('Roch', rochat)).toBe(true);
     expect(trifft('roch', rochat)).toBe(true);

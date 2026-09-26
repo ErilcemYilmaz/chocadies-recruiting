@@ -1,6 +1,5 @@
-// Typen der Web-API, 1:1 nach api/openapi.yaml (components/schemas).
-// Die Wertelisten der Enums sind als Konstanten exportiert, damit Auswahllisten
-// und Anzeigenamen (i18n/anzeigenamen.ts) dieselbe Quelle verwenden.
+// Typen der Web-API nach api/openapi.yaml. Die Enum-Wertelisten dienen auch
+// als Quelle fuer Auswahllisten und Anzeigenamen.
 
 export const STATUS_WERTE = [
   'eingegangen',

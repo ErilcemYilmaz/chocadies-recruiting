@@ -1,7 +1,6 @@
 /**
- * Einheitliche Fehlerklasse fuer die Web-API. Wird vom zentralen
- * Error-Handler (middleware/errorHandler.ts) in das Fehler-Schema aus
- * api/openapi.yaml (components/schemas/Fehler) uebersetzt.
+ * Fehlerklasse der Web-API; der errorHandler macht daraus eine Antwort im
+ * Fehler-Schema aus api/openapi.yaml.
  */
 export interface FehlerDetail {
   feld: string;
@@ -19,10 +18,6 @@ export class ApiError extends Error {
     this.code = code;
     this.details = details;
     this.name = 'ApiError';
-  }
-
-  static ungueltigeAnfrage(meldung: string, details?: FehlerDetail[]): ApiError {
-    return new ApiError(400, 'VALIDIERUNG_FEHLGESCHLAGEN', meldung, details);
   }
 
   static nichtAuthentisiert(meldung = 'Kein gueltiges Zugriffstoken vorhanden.'): ApiError {

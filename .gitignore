@@ -21,9 +21,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Schriftliche Arbeit (entsteht im Claude-Projekt, nicht im Repo)
+# Schriftliche Arbeit (nicht im Repository)
 *.docx
 ~$*
 
-# Aufgabenstellung und Leitfaeden der WISS (nur lokal)
+# Aufgabenstellung (nicht im Repository)
 docs/*.pdf

@@ -25,7 +25,7 @@ function alsFormularwerte(b: Bewerbung): Formularwerte {
   };
 }
 
-/** S5 Bewerbung bearbeiten. Nach dem Speichern bleibt die Seite offen und zeigt "Aenderungen gespeichert". */
+/** S5 Bewerbung bearbeiten; nach dem Speichern bleibt die Seite offen. */
 export function BewerbungBearbeiten() {
   const { id = '' } = useParams();
   const { t } = useSprache();

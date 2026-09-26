@@ -2,18 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { setzeBeiNichtAuthentisiert, setzeToken } from '../api/client';
 
 /**
- * Anmeldung der SPA (PROTOTYP).
- *
- * Die Web-API stellt selbst keine Tokens aus (api/openapi.yaml, bearerAuth:
- * Ausstellung durch einen vorgelagerten Anmeldedienst). Bis dieser Dienst
- * angebunden ist, prueft die Maske S1 ein einzelnes Demo-Konto aus
- * web/.env.local und verwendet ein mit `npm run token:intern` erzeugtes
- * Token. Diese Werte landen im Browser-Bundle und sind ausschliesslich fuer
- * die lokale Entwicklung gedacht.
- *
- * Die Schnittstelle (anmelden/abmelden/benutzer) bleibt beim Wechsel auf
- * einen echten Anmeldedienst gleich, nur die Implementierung von anmelden
- * aendert sich.
+ * Anmeldung (Prototyp): Die API stellt keine Tokens aus. Bis ein
+ * Anmeldedienst angebunden ist, wird ein Demo-Konto aus web/.env.local
+ * geprueft und ein Test-Token verwendet (nur fuer die lokale Entwicklung).
+ * Beim Wechsel auf einen echten Dienst aendert sich nur anmelden().
  */
 
 export interface Benutzer {

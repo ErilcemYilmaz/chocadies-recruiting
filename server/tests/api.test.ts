@@ -6,12 +6,8 @@ import jwt from 'jsonwebtoken';
 process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'test-secret';
 process.env.MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/test';
 
-// Repository wird gemockt: diese Tests pruefen die Web-API-Schicht
-// (Auth, Validierung, Controller, Fehlerformat), nicht die echte
-// MongoDB-Anbindung. Die Persistenz selbst wird ueber
-// scripts/testConnection.ts (siehe docs/mongodb-atlas-setup.md) und die
-// Postman-Collection (tests/chocadies-recruiting.postman_collection.json)
-// gegen eine echte Datenbank abgedeckt.
+// Repository gemockt: getestet wird die Web-API-Schicht (Auth, Validierung,
+// Controller, Fehlerformat) ohne Datenbank.
 vi.mock('../src/repositories/bewerbung.repository.js', () => {
   return {
     bewerbungRepository: {
@@ -255,7 +251,7 @@ describe('PUT /v1/bewerbungen/:id', () => {
     );
   });
 
-  it('entfernt optionale Felder, die im PUT fehlen (Befund B-3)', async () => {
+  it('entfernt optionale Felder, die im PUT fehlen', async () => {
     vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(
       alsDbBewerbung({ telefon: '+41 79 123 45 67', bemerkung: 'alt' }) as never,
     );

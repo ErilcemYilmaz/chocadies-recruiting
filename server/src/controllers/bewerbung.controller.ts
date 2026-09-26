@@ -5,11 +5,8 @@ import { ApiError } from '../errors/ApiError.js';
 import { BewerbungAenderung, BewerbungEingabe, SucheQuery } from '../schemas/bewerbung.schema.js';
 
 /**
- * REST-Controller (Komponente CTRL, stellt Interface IBewerbungAPI bereit).
- * Setzt die fuenf Operationen aus api/openapi.yaml (Pfad /bewerbungen) um
- * und delegiert die eigentliche Persistenz an bewerbungRepository (REPO).
- * Enthaelt bewusst keine Mongoose-/MongoDB-spezifische Logik, siehe
- * Interface IPersistenz im Komponentendiagramm.
+ * REST-Controller: setzt die fuenf Operationen aus api/openapi.yaml um und
+ * delegiert die Persistenz an das Repository (keine Mongoose-Logik hier).
  */
 
 // Nur die im OpenAPI-Schema "Bewerbung" definierten Felder nach aussen
@@ -36,20 +33,17 @@ function serialisieren(b: IBewerbung) {
 /** Optionale Freitextfelder, die per PUT ohne Wert entfernt werden. */
 const OPTIONALE_FELDER = ['telefon', 'bemerkung'] as const;
 
-/** Personalvermittlungsfirmen sehen ausschliesslich eigene Bewerbungen (openapi.yaml Z. 43-45). */
+/** Personalvermittlungsfirmen sehen ausschliesslich eigene Bewerbungen. */
 function pruefeZugriff(req: Request, bewerbung: IBewerbung): void {
   if (req.auth?.scope === 'personalvermittlung' && bewerbung.vermittlerId !== req.auth.firmaId) {
-    // Bewusst 404 statt 403: openapi.yaml definiert fuer GET/PUT keinen
-    // 403-Fall, nur fuer DELETE (siehe loeschen unten). 404 vermeidet
-    // zudem, die Existenz fremder Bewerbungen zu bestaetigen.
+    // 404 statt 403: verraet nicht, dass die fremde Bewerbung existiert.
     throw ApiError.nichtGefunden();
   }
 }
 
 export async function bewerbungenSuchen(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    // req.query wurde bereits durch validate(SucheQuerySchema, 'query') geparst
-    // und mit Defaults befuellt (siehe middleware/validate.ts).
+    // Bereits durch validate() geparst und mit Standardwerten befuellt.
     const query = req.query as unknown as SucheQuery;
     const vermittlerId = req.auth?.scope === 'personalvermittlung' ? req.auth.firmaId : undefined;
 
@@ -86,10 +80,8 @@ export async function bewerbungAnlegen(req: Request, res: Response, next: NextFu
     const istVermittler = req.auth?.scope === 'personalvermittlung';
     const neu = await bewerbungRepository.anlegen({
       ...eingabe,
-      // Serverseitig gesetzt, siehe openapi.yaml Zeile 98f.: id, status,
-      // eingangsdatum werden im Anfragekoerper ignoriert. quelle und
-      // vermittlerId werden bei Personalvermittlungsfirmen zusaetzlich vom
-      // Server anhand des Zugriffstokens gesetzt, nicht vom Aufrufer.
+      // Bei Personalvermittlungsfirmen setzt der Server quelle und
+      // vermittlerId aus dem Zugriffstoken, nie aus dem Anfragekoerper.
       quelle: istVermittler ? 'personalvermittlung' : undefined,
       vermittlerId: istVermittler ? req.auth?.firmaId : undefined,
       statusverlauf: [{ status: 'eingegangen', zeitpunkt: new Date(), geaendertVon: req.auth!.sub }],
@@ -132,9 +124,7 @@ export async function bewerbungAendern(req: Request, res: Response, next: NextFu
         ? { status: eingabe.status, zeitpunkt: new Date(), geaendertVon: req.auth!.sub }
         : undefined;
 
-    // PUT ersetzt die aenderbaren Felder: Fehlt ein optionales Feld, wird es
-    // entfernt statt stillschweigend beibehalten (Befund B-3 aus dem
-    // Systemtest 4.4.3: Telefonnummer liess sich nicht loeschen).
+    // PUT ersetzt die aenderbaren Felder: fehlende optionale Felder entfernen.
     const entfernen = OPTIONALE_FELDER.filter((feld) => eingabe[feld] === undefined);
 
     const geaendert = await bewerbungRepository.aendern(req.params.bewerbungId, eingabe, statuswechsel, entfernen);
@@ -151,9 +141,7 @@ export async function bewerbungLoeschen(req: Request, res: Response, next: NextF
     const bestehend = await bewerbungRepository.findenNachId(req.params.bewerbungId);
     if (!bestehend) throw ApiError.nichtGefunden();
 
-    // Loeschen ist bewusst restriktiver als Lesen/Aendern: nur interne
-    // Sachbearbeitende duerfen loeschen (openapi.yaml definiert dafuer
-    // explizit einen 403-Fall, anders als bei GET/PUT).
+    // Loeschen duerfen nur interne Sachbearbeitende.
     if (req.auth?.scope !== 'intern') {
       throw ApiError.keineBerechtigung('Nur interne Benutzende duerfen Bewerbungen loeschen.');
     }

@@ -14,8 +14,6 @@
     "db:test": "tsx scripts/testConnection.ts",
     "token:intern": "tsx scripts/generateTestToken.ts intern",
     "token:vermittler": "tsx scripts/generateTestToken.ts vermittler",
-    "testdaten:anlegen": "tsx scripts/testdaten.ts anlegen",
-    "testdaten:entfernen": "tsx scripts/testdaten.ts entfernen",
     "test": "vitest run tests/api.test.ts tests/suchfilter.test.ts",
     "test:newman": "vitest run tests/newman-smoke.test.ts"
   },

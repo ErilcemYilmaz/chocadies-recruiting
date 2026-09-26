@@ -1,16 +1,18 @@
 # chocadies-recruiting
 
 Personalgewinnungsplattform der Chocolatier Chocadies AG (APDE
-Transferaufgabe). Technologie-Entscheidungen und Setup-Ablauf siehe
-`docs/APDE_Entscheidungen_und_Setup.md`.
+Transferaufgabe).
 
 ## Struktur
 
-- `server` – Server-App (Node.js 22, TypeScript, Express, Mongoose), Kapitel 4.2
-- `web` – SPA Web-App (React, Vite), Kapitel 4.3
-- `api` – `openapi.yaml`, Kapitel 4.1
-- `docs` – Diagramme, Screenshots, Arbeitsprotokolle, KI-Protokoll
-- `tests` – Postman-Collection
+| Ordner | Inhalt | Kapitel |
+|---|---|---|
+| `api` | API-Spezifikation `openapi.yaml` (OpenAPI 3.1) | 4.1 |
+| `docs` | Komponentendiagramm (PlantUML), Deployment-Anleitung | 4.1, 4.4 |
+| `server` | Server-App (Node.js 22, TypeScript, Express, MongoDB/Mongoose) | 4.2 |
+| `tests` | Postman-Collection fuer die API-Tests | 4.2 |
+| `web` | SPA Web-App (React, Vite, TypeScript) | 4.3 |
+| `.github/workflows`, `Dockerfile`, `docker-compose.yml` | CI/CD und Container | 4.4 |
 
 ## Server lokal starten
 
@@ -58,9 +60,3 @@ docker compose --env-file web/.env.local up --build   # SPA unter http://localho
 
 CI/CD (GitHub Actions, GHCR, Azure Container Apps), Secrets und Rollback:
 siehe `docs/deployment.md`.
-
-## Arbeitsweise
-
-Code und technische Artefakte entstehen mit Claude Code in diesem Repo,
-der Fliesstext der Arbeit separat in einem Claude-Projekt. Die Bruecke sind
-die Uebergabe-Dateien in `docs/uebergabe/`, Regeln siehe `CLAUDE.md`.

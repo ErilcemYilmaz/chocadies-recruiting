@@ -1,8 +1,6 @@
 import type { SVGProps } from 'react';
 
-// Einfache Linien-Icons als Inline-SVG (keine Icon-Bibliothek). Rein
-// dekorativ: aria-hidden, die Bedeutung traegt immer der Text daneben
-// oder ein aria-label am Button.
+// Dekorative Inline-SVG-Icons (aria-hidden); die Bedeutung traegt der Text daneben.
 
 function Icon(props: SVGProps<SVGSVGElement>) {
   return (

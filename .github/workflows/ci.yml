@@ -1,4 +1,4 @@
-# Continuous Integration (Kapitel 4.4.1).
+# Continuous Integration.
 #
 # Bei jedem Push und Pull Request: Server-App und SPA bauen und testen,
 # OpenAPI-Spezifikation validieren, Produktivabhaengigkeiten auf bekannte

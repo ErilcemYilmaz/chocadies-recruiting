@@ -75,11 +75,8 @@ export function BewerbungFormular({
     setFehler((bisher) => ({ ...bisher, [feld]: pruefeFeld(feld, werte, t) }));
   }
 
-  // Befund B-1 (Systemtest 4.4.3): Beim Druecken der Maustaste verliess der
-  // Fokus das Feld, die Fehlermeldung unter dem Feld erschien und schob die
-  // Knoepfe nach unten, sodass der Klick verloren ging. Den Fokus beim
-  // Mausdruck im Feld lassen verhindert die Verschiebung; die Pruefung beim
-  // Speichern meldet ohnehin alle Fehler.
+  // Fokus beim Mausdruck im Feld lassen: Sonst erscheint die Fehlermeldung
+  // des Feldes, verschiebt die Knoepfe und der Klick geht verloren.
   function fokusBehalten(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
   }

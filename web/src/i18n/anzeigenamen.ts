@@ -1,10 +1,8 @@
 import type { Bewerbungsstatus, Dokumenttyp, Quelle, Sprache, Standort } from '../api/typen';
 
 /**
- * Anzeigenamen der Enum-Werte aus api/openapi.yaml, zentral an einer Stelle.
- * Record<...> erzwingt, dass jeder Wert der API einen Namen in beiden
- * Sprachen hat: Kommt in der Spezifikation ein Wert dazu (und damit in
- * api/typen.ts), bricht der Build ab, bis er hier ergaenzt ist.
+ * Anzeigenamen der Enum-Werte aus api/openapi.yaml. Record<...> erzwingt
+ * einen Namen je Wert und Sprache, sonst bricht der Build ab.
  */
 type Namen<T extends string> = Record<T, Record<Sprache, string>>;
 

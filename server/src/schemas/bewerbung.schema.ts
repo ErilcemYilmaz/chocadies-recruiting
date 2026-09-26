@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
-// Spiegelt exakt die Constraints aus api/openapi.yaml. Bewusst getrennt von
-// den Mongoose-Schemas (models/Bewerbung.model.ts): Zod validiert die
-// HTTP-Eingabe (Schicht Eingabevalidierung/VALID), Mongoose validiert die
-// Persistenz (Schicht Data-Access-Layer/REPO). Zwei Schichten aus dem
-// Komponentendiagramm, zwei getrennte Validierungen.
+// Validierung der HTTP-Eingaben nach den Constraints aus api/openapi.yaml.
+// Die Mongoose-Schemas pruefen zusaetzlich beim Speichern.
 
 export const StandortSchema = z.enum([
   'lenzburg',
@@ -32,8 +29,7 @@ export const DokumentSchema = z
   })
   .strict();
 
-// requestBody von POST/PUT /bewerbungen: additionalProperties: false in
-// openapi.yaml -> .strict() lehnt unbekannte Felder ab (400).
+// Anfragekoerper von POST; .strict() lehnt unbekannte Felder ab (400).
 export const BewerbungEingabeSchema = z
   .object({
     nachname: z.string().min(1).max(100),
@@ -51,8 +47,7 @@ export const BewerbungEingabeSchema = z
   })
   .strict();
 
-// requestBody von PUT /bewerbungen/{id} (Schema BewerbungAenderung):
-// zusaetzlich status, wer ihn setzen darf, prueft der Controller.
+// Anfragekoerper von PUT: zusaetzlich status (Berechtigung prueft der Controller).
 export const BewerbungAenderungSchema = BewerbungEingabeSchema.extend({
   status: BewerbungsstatusSchema.optional(),
 }).strict();

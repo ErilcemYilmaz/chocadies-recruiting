@@ -11,9 +11,8 @@ interface Props {
 }
 
 /**
- * Grundlayout der angemeldeten Screens. Ab 768 px: feste Seitenleiste links.
- * Darunter: Kopfzeile mit Hamburger-Menue, Titel und rundem "+"-Knopf, die
- * Seitenleiste oeffnet sich als Schublade.
+ * Grundlayout: ab 768 px feste Seitenleiste, darunter Kopfzeile mit Menue,
+ * die Seitenleiste oeffnet sich dann als Schublade.
  */
 export function Layout({ mobilTitel, children }: Props) {
   const { t } = useSprache();

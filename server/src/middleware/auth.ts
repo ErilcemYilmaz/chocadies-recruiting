@@ -4,16 +4,9 @@ import { env } from '../config/env.js';
 import { ApiError } from '../errors/ApiError.js';
 
 /**
- * Authentisierung und Autorisierung (Komponente AUTH im Architekturdiagramm,
- * docs/architektur_komponenten.puml). Prueft das JWT-Bearer-Token aus dem
- * Authorization-Header gemaess components/securitySchemes/bearerAuth in
- * api/openapi.yaml.
- *
- * Die eigentliche Ausstellung der Tokens (Login der internen Benutzenden
- * bzw. technischer Benutzer der Personalvermittlungsfirmen) ist nicht Teil
- * dieser Web-API, siehe openapi.yaml, Beschreibung von bearerAuth. Fuer
- * lokale Entwicklung und Postman-Tests erzeugt scripts/generateTestToken.ts
- * gueltige Test-Tokens mit demselben Secret.
+ * Prueft das JWT-Bearer-Token (bearerAuth in api/openapi.yaml) und legt
+ * Benutzer und Rolle in req.auth ab. Die Tokens stellt ein vorgelagerter
+ * Anmeldedienst aus; fuer Tests erzeugt scripts/generateTestToken.ts welche.
  */
 
 export type Scope = 'intern' | 'personalvermittlung';
@@ -26,7 +19,6 @@ export interface AuthKontext {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       auth?: AuthKontext;

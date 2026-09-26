@@ -6,11 +6,8 @@ import { IconMuelleimer, IconUpload } from '../Icons';
 import { MAX_DOKUMENTE } from './validierung';
 
 /**
- * Ablageort fuer Dokumente. Die API speichert pro Dokument nur dateiname,
- * typ und url und bietet keinen Upload-Endpunkt (api/openapi.yaml, Schema
- * Dokument). Bis ein Dokumentenspeicher angebunden ist, erhalten neue
- * Dokumente eine URL unter dieser geplanten Adresse, die Datei selbst wird
- * nicht uebertragen (Abweichung, siehe Uebergabe 4.3).
+ * Geplanter Ablageort. Die API speichert nur dateiname, typ und url und hat
+ * keinen Upload-Endpunkt; die Datei selbst wird noch nicht uebertragen.
  */
 const DOKUMENT_ABLAGE = 'https://dokumente.chocadies.ch/bewerbungen/';
 

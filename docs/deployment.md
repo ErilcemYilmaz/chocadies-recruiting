@@ -2,7 +2,7 @@
 
 Container-Images der Server-App und der SPA, CI/CD mit GitHub Actions,
 Betrieb auf Azure Container Apps (Region Switzerland North), Datenbank
-MongoDB Atlas. Kapitel 4.4.1.
+MongoDB Atlas.
 
 ```
 Push/PR ──► CI (ci.yml) ──────────────────────────────► gruen?
@@ -102,7 +102,7 @@ Beide Umgebungen verwenden `.github/workflows/_deploy-umgebung.yml`.
    IP Access List freigeben.
 6. **Anmeldung der SPA**: Die Prototyp-Anmeldung funktioniert in den
    CI-Images bewusst nicht (keine Demo-Werte im Image). Fuer Staging und
-   Produktion braucht es einen echten Anmeldedienst, siehe Uebergabe 4.3.
+   Produktion braucht es einen echten Anmeldedienst (z.B. Microsoft Entra ID).
 
 ## Rollback
 

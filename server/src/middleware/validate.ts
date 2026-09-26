@@ -2,11 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { ZodType } from 'zod';
 
 /**
- * Eingabevalidierung (Komponente VALID im Architekturdiagramm). Validiert
- * Body, Query oder Params gegen ein Zod-Schema und ersetzt sie durch die
- * geparste (z.B. mit Defaults befuellte) Version. Wirft bei einem Fehler
- * einen ZodError, den der zentrale errorHandler in eine 400-Antwort im
- * Fehler-Schema uebersetzt.
+ * Validiert Body, Query oder Params gegen ein Zod-Schema und ersetzt sie
+ * durch die geparste Version. Fehler werden vom errorHandler zu 400.
  */
 type Quelle = 'body' | 'query' | 'params';
 

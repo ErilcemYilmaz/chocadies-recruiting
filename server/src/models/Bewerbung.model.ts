@@ -1,7 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 
-// Werte 1:1 aus api/openapi.yaml uebernommen, damit Datenmodell und
-// Web-API-Spezifikation nicht auseinanderlaufen.
+// Wertelisten 1:1 aus api/openapi.yaml.
 
 export type Standort =
   | 'lenzburg'
@@ -30,9 +29,8 @@ export interface IDokument {
 }
 
 /**
- * Eintrag im Statusverlauf. Erfuellt die Vorgabe aus api/openapi.yaml
- * (PUT /bewerbungen/{id}), Statuswechsel fuer die Auskunftspflicht nach DSG
- * und DSGVO zu protokollieren. Nur intern, wird nie an Clients ausgeliefert.
+ * Eintrag im Statusverlauf (Protokoll fuer die Auskunftspflicht nach DSG und
+ * DSGVO). Nur intern, wird nie an Clients ausgeliefert.
  */
 export interface IStatusEintrag {
   status: Bewerbungsstatus;
@@ -56,12 +54,8 @@ export interface IBewerbung extends Document {
   eingangsdatum: Date;
   aenderungsdatum?: Date;
   /**
-   * Interne Kennung der Personalvermittlungsfirma, welche die Bewerbung
-   * eingereicht hat. Nicht Teil des oeffentlichen Bewerbung-Schemas aus
-   * api/openapi.yaml, dient ausschliesslich der Zugriffssteuerung (AUTH-
-   * Komponente): Personalvermittlungsfirmen sehen gemaess openapi.yaml
-   * (Zeilen 43-45) nur ihre eigenen Bewerbungen. Wird nie an den Client
-   * serialisiert, siehe controllers/bewerbung.controller.ts#serialisieren.
+   * Personalvermittlungsfirma, die die Bewerbung eingereicht hat. Nur fuer
+   * die Zugriffssteuerung, wird nie an Clients ausgeliefert.
    */
   vermittlerId?: string;
   statusverlauf: IStatusEintrag[];
@@ -150,8 +144,6 @@ const BewerbungSchema = new Schema<IBewerbung>(
   },
 );
 
-// Freitextsuche ueber Nachname, Vorname, Stelle (Endpoint GET /bewerbungen, Parameter suchbegriff).
-BewerbungSchema.index({ nachname: 'text', vorname: 'text', stelle: 'text' });
 // Filterung nach status und standort beschleunigen.
 BewerbungSchema.index({ status: 1, standort: 1 });
 // Zugriffsfilterung fuer Personalvermittlungsfirmen beschleunigen.

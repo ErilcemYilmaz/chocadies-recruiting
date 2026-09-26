@@ -1,10 +1,6 @@
 /**
- * Uebersetzungsdatei der SPA. Alle sichtbaren Texte stehen hier, je einmal
- * auf Deutsch und Franzoesisch (Standorte Lenzburg und Nancy). Die
- * Anzeigenamen der API-Enums stehen separat in anzeigenamen.ts.
- *
- * fr ist als "typeof de" typisiert: Fehlt ein Text oder hat er eine andere
- * Form, bricht der TypeScript-Build ab.
+ * Alle sichtbaren Texte der SPA auf Deutsch und Franzoesisch. fr ist als
+ * "typeof de" typisiert: Fehlt ein Text, bricht der Build ab.
  */
 
 const de = {
@@ -39,15 +35,12 @@ const de = {
     sitzungAbgelaufen: 'Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.',
   },
   allgemein: {
-    abbrechen: 'Abbrechen',
-    speichern: 'Speichern',
     laden: 'Wird geladen …',
     keineAngabe: '–',
     zurueck: 'Zurück',
     weiter: 'Weiter',
     serverNichtErreichbar: 'Der Server ist nicht erreichbar. Bitte später erneut versuchen.',
     unerwarteterFehler: 'Es ist ein unerwarteter Fehler aufgetreten.',
-    meldungSchliessen: 'Meldung schliessen',
   },
   liste: {
     titel: 'Bewerbungen',
@@ -193,15 +186,12 @@ const fr: Texte = {
     sitzungAbgelaufen: 'Votre session a expiré. Veuillez vous reconnecter.',
   },
   allgemein: {
-    abbrechen: 'Annuler',
-    speichern: 'Enregistrer',
     laden: 'Chargement …',
     keineAngabe: '–',
     zurueck: 'Précédent',
     weiter: 'Suivant',
     serverNichtErreichbar: 'Le serveur est injoignable. Veuillez réessayer plus tard.',
     unerwarteterFehler: "Une erreur inattendue s'est produite.",
-    meldungSchliessen: 'Fermer le message',
   },
   liste: {
     titel: 'Candidatures',

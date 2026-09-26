@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Chocadies Recruiting API",
-    "description": "Testfaelle fuer die Web-API aus api/openapi.yaml (Kapitel 4.2.4). Setzt {{internToken}} und {{vermittlerToken}} vor der Ausfuehrung, z.B. mit npm run token:intern / npm run token:vermittler im Ordner server (siehe tests/README.md).",
+    "description": "Testfaelle fuer die Web-API aus api/openapi.yaml. Setzt {{internToken}} und {{vermittlerToken}} vor der Ausfuehrung, z.B. mit npm run token:intern / npm run token:vermittler im Ordner server (siehe tests/README.md).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [

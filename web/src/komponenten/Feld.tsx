@@ -18,9 +18,8 @@ interface Props {
 }
 
 /**
- * Formularfeld mit sichtbarem Label, Pflichtkennzeichnung und Fehlertext
- * direkt beim Feld. Fehler- und Hinweistext sind ueber aria-describedby mit
- * dem Eingabeelement verbunden, damit Screenreader sie beim Fokus vorlesen.
+ * Formularfeld mit Label, Pflichtkennzeichnung und Fehlertext beim Feld,
+ * per aria-describedby mit dem Eingabeelement verbunden.
  */
 export function Feld({ label, pflicht = false, fehler, hinweis, className = '', children }: Props) {
   const id = useId();

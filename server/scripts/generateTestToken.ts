@@ -2,13 +2,8 @@ import jwt from 'jsonwebtoken';
 import { env } from '../src/config/env.js';
 
 /**
- * Erzeugt ein gueltiges JWT-Test-Token fuer lokale Entwicklung und die
- * Postman-Collection (tests/chocadies-recruiting.postman_collection.json).
- * Ersetzt NICHT die echte Anmeldung der Plattform bzw. den technischen
- * Benutzer der Personalvermittlungsfirmen (siehe api/openapi.yaml,
- * bearerAuth-Beschreibung) - nur fuer Tests gegen die lokale Basis-App.
+ * Erzeugt ein Test-Token (8 h gueltig) fuer lokale Tests und Postman.
  *
- * Aufruf:
  *   npm run token:intern
  *   npm run token:vermittler -- firma-muster-ag
  */

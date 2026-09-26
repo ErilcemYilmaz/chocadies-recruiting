@@ -9,11 +9,7 @@ interface Props {
   className?: string;
 }
 
-/**
- * Hinweis- und Statusmeldungen: Warnung (S4, 409 Konflikt), Fehler und
- * Erfolg (S5, "Aenderungen gespeichert"). Warnung/Fehler werden als
- * role="alert" sofort vorgelesen, Erfolg hoeflich als role="status".
- */
+/** Warnung, Fehler (role="alert", sofort vorgelesen) oder Erfolg (role="status"). */
 export function Meldung({ art, children, className = '' }: Props) {
   return (
     <div className={`meldung meldung--${art} ${className}`.trim()} role={art === 'erfolg' ? 'status' : 'alert'}>

@@ -15,7 +15,6 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    // Nur die Komponententests; die Playwright-Tests in e2e/ laufen separat.
     include: ['tests/**/*.test.{ts,tsx}'],
     setupFiles: ['./tests/setup.ts'],
     css: false,

@@ -14,9 +14,8 @@ const PRO_SEITE = 20;
 const SUCHE_VERZOEGERUNG_MS = 300;
 
 /**
- * S2 Bewerbungen. Filter und Seite stehen in der URL (?suche=&status=&standort=&seite=),
- * damit "Zurueck" aus dem Detail wieder dieselbe Ansicht zeigt.
- * Unter 768 px: Filter hinter der Schaltflaeche "Filter", Karten statt Tabelle.
+ * S2 Bewerbungen. Filter und Seite stehen in der URL, damit "Zurueck" aus
+ * dem Detail dieselbe Ansicht zeigt. Mobil: Filter einklappbar, Karten.
  */
 export function Bewerbungsliste() {
   const { t, sprache, datum } = useSprache();

@@ -9,10 +9,8 @@ import {
 import { suchbegriffFilter } from './suchfilter.js';
 
 /**
- * Data-Access-Layer fuer das Datenobjekt Bewerbung (siehe Komponentendiagramm,
- * Data-Access-Layer -> Bewerbungs-Repository). Kapselt sämtlichen
- * Mongoose-/MongoDB-Zugriff, damit die Domaenenschicht (Bewerbungsdienst)
- * keine Kenntnis der Persistenztechnologie braucht (Interface IPersistenz).
+ * Data-Access-Layer fuer das Datenobjekt Bewerbung. Kapselt saemtlichen
+ * Mongoose-Zugriff, die uebrigen Schichten kennen die Datenbank nicht.
  */
 
 export interface SucheOptionen {

@@ -3,10 +3,7 @@ import { env } from './env.js';
 
 mongoose.set('strictQuery', true);
 
-/**
- * Baut die Verbindung zur MongoDB (Atlas) ueber Mongoose auf.
- * Der Verbindungsstring stammt aus MONGODB_URI (lokale server/.env, siehe README.md).
- */
+/** Verbindet Mongoose mit der MongoDB aus MONGODB_URI. */
 export async function connectDb(): Promise<typeof mongoose> {
   mongoose.connection.on('connected', () => {
     console.log('[MongoDB] Verbindung hergestellt.');

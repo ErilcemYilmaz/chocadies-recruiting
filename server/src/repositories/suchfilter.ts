@@ -2,15 +2,11 @@ import { FilterQuery } from 'mongoose';
 import { IBewerbung } from '../models/Bewerbung.model.js';
 
 /**
- * Filter fuer die Freitextsuche (Parameter suchbegriff, GET /bewerbungen).
- *
- * Findet Bewerbungen, bei denen jedes Wort des Suchbegriffs am Anfang eines
- * Wortes in Nachname, Vorname oder Stelle steht, ohne Gross-/Kleinschreibung.
+ * Filter fuer die Freitextsuche (Parameter suchbegriff, GET /bewerbungen):
+ * Jedes Wort des Suchbegriffs muss am Anfang eines Wortes in Nachname,
+ * Vorname oder Stelle stehen, ohne Gross-/Kleinschreibung.
  * Beispiel: "Roch" findet "Rochat", "choco lenz" findet "Chocolatier/in
  * Produktion Lenzburg".
- *
- * Ersetzt die fruehere MongoDB-Volltextsuche ($text), die nur ganze Woerter
- * fand (Befund B-2 aus dem Systemtest 4.4.3, tests/systemtest-4.4.3.md).
  */
 
 const SUCHFELDER = ['nachname', 'vorname', 'stelle'] as const;
