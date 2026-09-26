@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiFehler, bewerbungApi } from '../src/api/client';
@@ -58,5 +58,19 @@ describe('Formular Neue Bewerbung (S4)', () => {
     );
     // Leere optionale Felder gehen nicht an die API (Telefon-Pattern wuerde "" ablehnen).
     expect(vi.mocked(bewerbungApi.anlegen).mock.calls[0][0]).not.toHaveProperty('telefon');
+  });
+
+  it('nimmt beim Mausdruck auf Speichern den Fokus nicht aus dem Feld (Befund B-1)', async () => {
+    const user = userEvent.setup();
+    rendereSeite('/bewerbungen/neu', '/bewerbungen/neu', <NeueBewerbung />);
+    const email = screen.getByRole('textbox', { name: 'E-Mail' });
+    await user.type(email, 'anna.meier');
+
+    // false = Standardaktion (Fokuswechsel und damit Blur-Pruefung) verhindert
+    const standardAusgefuehrt = fireEvent.mouseDown(screen.getByRole('button', { name: 'Speichern' }));
+
+    expect(standardAusgefuehrt).toBe(false);
+    expect(email).toHaveFocus();
+    expect(email).toHaveAttribute('aria-invalid', 'false');
   });
 });

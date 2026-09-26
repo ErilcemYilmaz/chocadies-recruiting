@@ -233,6 +233,7 @@ describe('PUT /v1/bewerbungen/:id', () => {
       '6620f1a2c3d4e5f6a7b8c9d0',
       expect.objectContaining({ status: 'in_pruefung' }),
       expect.objectContaining({ status: 'in_pruefung', geaendertVon: 'intern:test' }),
+      expect.any(Array),
     );
   });
 
@@ -250,7 +251,24 @@ describe('PUT /v1/bewerbungen/:id', () => {
       '6620f1a2c3d4e5f6a7b8c9d0',
       expect.any(Object),
       undefined,
+      expect.any(Array),
     );
+  });
+
+  it('entfernt optionale Felder, die im PUT fehlen (Befund B-3)', async () => {
+    vi.mocked(bewerbungRepository.findenNachId).mockResolvedValue(
+      alsDbBewerbung({ telefon: '+41 79 123 45 67', bemerkung: 'alt' }) as never,
+    );
+    vi.mocked(bewerbungRepository.aendern).mockResolvedValue(alsDbBewerbung() as never);
+
+    const res = await request(app)
+      .put('/v1/bewerbungen/6620f1a2c3d4e5f6a7b8c9d0')
+      .set('Authorization', `Bearer ${internToken()}`)
+      .send({ ...gueltigeBewerbung, bemerkung: 'neu' });
+
+    expect(res.status).toBe(200);
+    // telefon fehlt im Anfragekoerper -> entfernen; bemerkung ist gesetzt -> behalten
+    expect(vi.mocked(bewerbungRepository.aendern).mock.calls[0][3]).toEqual(['telefon']);
   });
 
   it('verweigert Personalvermittlungsfirmen den Statuswechsel mit 403', async () => {

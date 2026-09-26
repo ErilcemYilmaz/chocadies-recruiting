@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { STANDORT_WERTE, STATUS_WERTE, SPRACH_WERTE, type Bewerbungsstatus, type Sprache, type Standort } from '../../api/typen';
 import { anzeigename } from '../../i18n/anzeigenamen';
 import { useSprache } from '../../i18n/SprachKontext';
@@ -73,6 +73,15 @@ export function BewerbungFormular({
     const wert = werte[feld];
     if (typeof wert === 'string' && !wert.trim()) return;
     setFehler((bisher) => ({ ...bisher, [feld]: pruefeFeld(feld, werte, t) }));
+  }
+
+  // Befund B-1 (Systemtest 4.4.3): Beim Druecken der Maustaste verliess der
+  // Fokus das Feld, die Fehlermeldung unter dem Feld erschien und schob die
+  // Knoepfe nach unten, sodass der Klick verloren ging. Den Fokus beim
+  // Mausdruck im Feld lassen verhindert die Verschiebung; die Pruefung beim
+  // Speichern meldet ohnehin alle Fehler.
+  function fokusBehalten(e: MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
   }
 
   function absenden(e: FormEvent) {
@@ -227,10 +236,10 @@ export function BewerbungFormular({
       </div>
 
       <div className="formular__aktionen">
-        <button type="button" className="knopf knopf--sekundaer" onClick={beiAbbrechen}>
+        <button type="button" className="knopf knopf--sekundaer" onMouseDown={fokusBehalten} onClick={beiAbbrechen}>
           {f.abbrechen}
         </button>
-        <button type="submit" className="knopf knopf--primaer" disabled={speichertGerade}>
+        <button type="submit" className="knopf knopf--primaer" onMouseDown={fokusBehalten} disabled={speichertGerade}>
           {speichertGerade ? f.speichernLaeuft : modus === 'neu' ? f.speichern : f.aenderungenSpeichern}
         </button>
       </div>

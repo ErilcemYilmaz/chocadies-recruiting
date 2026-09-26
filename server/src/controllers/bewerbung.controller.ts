@@ -33,6 +33,9 @@ function serialisieren(b: IBewerbung) {
   };
 }
 
+/** Optionale Freitextfelder, die per PUT ohne Wert entfernt werden. */
+const OPTIONALE_FELDER = ['telefon', 'bemerkung'] as const;
+
 /** Personalvermittlungsfirmen sehen ausschliesslich eigene Bewerbungen (openapi.yaml Z. 43-45). */
 function pruefeZugriff(req: Request, bewerbung: IBewerbung): void {
   if (req.auth?.scope === 'personalvermittlung' && bewerbung.vermittlerId !== req.auth.firmaId) {
@@ -129,7 +132,12 @@ export async function bewerbungAendern(req: Request, res: Response, next: NextFu
         ? { status: eingabe.status, zeitpunkt: new Date(), geaendertVon: req.auth!.sub }
         : undefined;
 
-    const geaendert = await bewerbungRepository.aendern(req.params.bewerbungId, eingabe, statuswechsel);
+    // PUT ersetzt die aenderbaren Felder: Fehlt ein optionales Feld, wird es
+    // entfernt statt stillschweigend beibehalten (Befund B-3 aus dem
+    // Systemtest 4.4.3: Telefonnummer liess sich nicht loeschen).
+    const entfernen = OPTIONALE_FELDER.filter((feld) => eingabe[feld] === undefined);
+
+    const geaendert = await bewerbungRepository.aendern(req.params.bewerbungId, eingabe, statuswechsel, entfernen);
     if (!geaendert) throw ApiError.nichtGefunden();
 
     res.status(200).json(serialisieren(geaendert));

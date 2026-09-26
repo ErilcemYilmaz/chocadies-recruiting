@@ -47,7 +47,10 @@ paths:
       parameters:
         - name: suchbegriff
           in: query
-          description: Freitextsuche ueber Nachname, Vorname und Stelle.
+          description: |
+            Freitextsuche ueber Nachname, Vorname und Stelle. Jedes Wort des
+            Suchbegriffs muss am Anfang eines Wortes in einem dieser Felder
+            stehen ("Roch" findet "Rochat"), ohne Gross-/Kleinschreibung.
           required: false
           schema:
             type: string
@@ -159,8 +162,9 @@ paths:
       tags: [Bewerbungen]
       summary: Bewerbung aendern
       description: |
-        Ersetzt die aenderbaren Felder der Bewerbung. Den Status duerfen nur
-        interne Benutzende aendern. Ohne Feld status bleibt der bisherige
+        Ersetzt die aenderbaren Felder der Bewerbung. Fehlen die optionalen
+        Felder telefon oder bemerkung, werden sie entfernt. Den Status duerfen
+        nur interne Benutzende aendern. Ohne Feld status bleibt der bisherige
         Status erhalten. Ein Statuswechsel wird protokolliert, damit die
         Auskunftspflicht nach DSG und DSGVO erfuellt werden kann.
       operationId: bewerbungAendern

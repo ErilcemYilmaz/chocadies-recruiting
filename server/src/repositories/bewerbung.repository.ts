@@ -6,6 +6,7 @@ import {
   IStatusEintrag,
   Standort,
 } from '../models/Bewerbung.model.js';
+import { suchbegriffFilter } from './suchfilter.js';
 
 /**
  * Data-Access-Layer fuer das Datenobjekt Bewerbung (siehe Komponentendiagramm,
@@ -49,7 +50,7 @@ export class BewerbungRepository {
 
     if (optionen.status) filter.status = optionen.status;
     if (optionen.standort) filter.standort = optionen.standort;
-    if (optionen.suchbegriff) filter.$text = { $search: optionen.suchbegriff };
+    if (optionen.suchbegriff) Object.assign(filter, suchbegriffFilter(optionen.suchbegriff));
     if (optionen.vermittlerId) filter.vermittlerId = optionen.vermittlerId;
 
     const [treffer, gesamt] = await Promise.all([
@@ -64,14 +65,20 @@ export class BewerbungRepository {
     return { treffer, seite, proSeite, gesamt };
   }
 
-  /** statuswechsel wird, falls angegeben, an den Statusverlauf angehaengt. */
+  /**
+   * statuswechsel wird, falls angegeben, an den Statusverlauf angehaengt.
+   * entfernen nennt optionale Felder, die geloescht werden sollen ($unset).
+   */
   async aendern(
     id: string,
     daten: Partial<IBewerbung>,
     statuswechsel?: IStatusEintrag,
+    entfernen: (keyof IBewerbung)[] = [],
   ): Promise<IBewerbung | null> {
     if (!isValidObjectId(id)) return null;
-    const update = statuswechsel ? { ...daten, $push: { statusverlauf: statuswechsel } } : daten;
+    const update: Record<string, unknown> = { ...daten };
+    if (statuswechsel) update.$push = { statusverlauf: statuswechsel };
+    if (entfernen.length > 0) update.$unset = Object.fromEntries(entfernen.map((feld) => [feld, 1]));
     return BewerbungModel.findByIdAndUpdate(id, update, {
       new: true,
       runValidators: true,
