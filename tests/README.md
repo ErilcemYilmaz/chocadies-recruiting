@@ -44,3 +44,9 @@ Am 23.09.2026 mit `npm run dev` gegen den echten Atlas-Cluster (M0,
 Frankfurt) und der Newman-Ausfuehrung oben: 12/12 Requests, 20/20
 Assertions erfolgreich. Die Collection raeumt ihre Testdaten selbst auf
 (Request 11 loescht die angelegte Bewerbung).
+
+## Manueller Systemtest (Kapitel 4.4.3)
+
+Testprotokoll: `systemtest-4.4.3.md` (ausgefuehrt am 26.09.2026, automatisiert
+mit `web/e2e/systemtest.spec.ts`, Screenshots in `docs/systemtest/`). Testdaten dazu im
+Ordner `server`: `npm run testdaten:anlegen` bzw. `npm run testdaten:entfernen`.

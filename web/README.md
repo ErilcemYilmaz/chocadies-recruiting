@@ -48,4 +48,21 @@ Browser-Bundle und sind nur fuer die lokale Entwicklung gedacht.
 | `src/komponenten/` | Seitenleiste, Layout, Dialog, Feld, Meldung, Formular S4/S5 |
 | `src/seiten/` | Screens S1 bis S5 (S6 ist der Dialog auf S3) |
 | `src/styles/` | `variablen.css` (Farben, Schrift, 8-px-Raster), `app.css` |
-| `tests/` | Loeschdialog, Sprachumschaltung, Formularvalidierung |
+| `tests/` | Komponententests: Loeschdialog, Sprachumschaltung, Formular |
+| `e2e/` | Playwright: Systemtest 4.4.3, Screenshots 4.3 |
+
+## End-to-End-Test (Playwright)
+
+Laeuft in Chrome gegen die gestartete Anwendung (Standard
+http://localhost:8080, aenderbar mit `E2E_BASE_URL`). Voraussetzungen:
+Container laufen, Testdaten angelegt (`cd server && npm run testdaten:anlegen`),
+Demo-Anmeldung in `web/.env.local`.
+
+```bash
+npm run test:e2e                          # Systemtest 4.4.3 + Screenshots 4.3
+npx playwright test e2e/systemtest.spec.ts
+```
+
+Screenshots: `docs/systemtest/` (Systemtest) und `docs/screenshots/4.3/`
+(Oberflaeche). Die Testfaelle veraendern Testdaten, vor einem neuen Lauf die
+Testdaten neu anlegen.
